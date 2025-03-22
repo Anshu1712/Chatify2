@@ -31,7 +31,7 @@
                 android:layout_height="30dp"
                 android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:background="@drawable/chat_bubble_right"
                 android:clickable="false"
                 android:contentDescription="@string/play_voice"

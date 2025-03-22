@@ -45,8 +45,9 @@ public class Chats {
     }
 
     public String getType() {
-        return type;
+        return (type != null) ? type : "TEXT";  // ✅ Default to TEXT if null
     }
+
 
     public void setType(String type) {
         this.type = type;

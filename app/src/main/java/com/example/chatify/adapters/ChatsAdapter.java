@@ -1,9 +1,15 @@
 package com.example.chatify.adapters;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +22,7 @@ import com.example.chatify.model.chat.Chats;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -26,12 +33,20 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private static final int MSG_TEXT_RIGHT = 1;
     private static final int MSG_IMAGE_LEFT = 2;
     private static final int MSG_IMAGE_RIGHT = 3;
+    private static final int MSG_VOICE_LEFT = 4;
+    private static final int MSG_VOICE_RIGHT = 5;
+
     private FirebaseUser firebaseUser;
+    private MediaPlayer mediaPlayer;
+    private ImageButton lastButton;
+    private Chronometer lastChronometer;
+    private Handler handler = new Handler();
 
     public ChatsAdapter(List<Chats> list, Context context) {
         this.list = list;
         this.context = context;
         this.firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        this.mediaPlayer = new MediaPlayer();
     }
 
     public void setList(List<Chats> list) {
@@ -53,6 +68,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 return new ViewHolderImageLeft(inflater.inflate(R.layout.chat_item_image_left, parent, false));
             case MSG_IMAGE_RIGHT:
                 return new ViewHolderImageRight(inflater.inflate(R.layout.chat_item_image_right, parent, false));
+            case MSG_VOICE_LEFT:
+                return new ViewHolderVoiceLeft(inflater.inflate(R.layout.chat_item_voice_left, parent, false));
+            case MSG_VOICE_RIGHT:
+                return new ViewHolderVoiceRight(inflater.inflate(R.layout.chat_item_voice_right, parent, false));
             default:
                 throw new IllegalArgumentException("Unknown view type: " + viewType);
         }
@@ -75,8 +94,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         else if (holder instanceof ViewHolderImageLeft && chat.getType().equals("IMAGE")) {
             Glide.with(context)
                     .load(chat.getUrl())
-                    .placeholder(R.drawable.person) // ✅ Add placeholder for smooth loading
-                    .error(R.drawable.person)             // ✅ Add error image
+                    .placeholder(R.drawable.person)
+                    .error(R.drawable.person)
                     .into(((ViewHolderImageLeft) holder).imageMessage);
         } else if (holder instanceof ViewHolderImageRight && chat.getType().equals("IMAGE")) {
             Glide.with(context)
@@ -84,6 +103,12 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .placeholder(R.drawable.person)
                     .error(R.drawable.person)
                     .into(((ViewHolderImageRight) holder).imageMessage);
+        }
+
+        // ✅ Handle Voice Message
+        else if ((holder instanceof ViewHolderVoiceLeft || holder instanceof ViewHolderVoiceRight)
+                && chat.getType().equals("VOICE")) {
+            setupVoicePlayer(holder, chat.getUrl());
         }
     }
 
@@ -101,10 +126,15 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         Chats chat = list.get(position);
 
         if (firebaseUser != null && chat.getSender().equals(firebaseUser.getUid())) {
-            return chat.getType().equals("TEXT") ? MSG_TEXT_RIGHT : MSG_IMAGE_RIGHT;
+            if (chat.getType().equals("TEXT")) return MSG_TEXT_RIGHT;
+            if (chat.getType().equals("IMAGE")) return MSG_IMAGE_RIGHT;
+            if (chat.getType().equals("VOICE")) return MSG_VOICE_RIGHT;
         } else {
-            return chat.getType().equals("TEXT") ? MSG_TEXT_LEFT : MSG_IMAGE_LEFT;
+            if (chat.getType().equals("TEXT")) return MSG_TEXT_LEFT;
+            if (chat.getType().equals("IMAGE")) return MSG_IMAGE_LEFT;
+            if (chat.getType().equals("VOICE")) return MSG_VOICE_LEFT;
         }
+        throw new IllegalArgumentException("Unknown message type");
     }
 
     // ✅ ViewHolder for Text (Left - Receiver)
@@ -145,5 +175,72 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             super(itemView);
             imageMessage = itemView.findViewById(R.id.image_chat);
         }
+    }
+
+    // ✅ ViewHolder for Voice (Left - Receiver)
+    public static class ViewHolderVoiceLeft extends RecyclerView.ViewHolder {
+        ImageButton playButton;
+        Chronometer timer;
+
+        public ViewHolderVoiceLeft(@NonNull View itemView) {
+            super(itemView);
+            playButton = itemView.findViewById(R.id.btn_play_voiceLeft);
+            timer = itemView.findViewById(R.id.txt_voice_durationLeft);
+        }
+    }
+
+    // ✅ ViewHolder for Voice (Right - Sender)
+    public static class ViewHolderVoiceRight extends RecyclerView.ViewHolder {
+        ImageButton playButton;
+        Chronometer timer;
+
+        public ViewHolderVoiceRight(@NonNull View itemView) {
+            super(itemView);
+            playButton = itemView.findViewById(R.id.btn_play_voice);
+            timer = itemView.findViewById(R.id.txt_voice_duration);
+        }
+    }
+
+    // ✅ MediaPlayer logic with Chronometer
+    private void setupVoicePlayer(RecyclerView.ViewHolder holder, String url) {
+        ImageButton playButton;
+        Chronometer timer;
+
+        if (holder instanceof ViewHolderVoiceLeft) {
+            playButton = ((ViewHolderVoiceLeft) holder).playButton;
+            timer = ((ViewHolderVoiceLeft) holder).timer;
+        } else {
+            playButton = ((ViewHolderVoiceRight) holder).playButton;
+            timer = ((ViewHolderVoiceRight) holder).timer;
+        }
+
+        playButton.setOnClickListener(v -> {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                timer.stop();
+                playButton.setImageResource(R.drawable.baseline_play_arrow_24);
+            } else {
+                try {
+                    mediaPlayer.reset();
+                    mediaPlayer.setDataSource(context, Uri.parse(url));
+                    mediaPlayer.prepare();
+
+                    timer.setBase(SystemClock.elapsedRealtime());
+                    timer.start();
+
+                    mediaPlayer.start();
+                    playButton.setImageResource(R.drawable.baseline_pause_24);
+
+                    mediaPlayer.setOnCompletionListener(mp -> {
+                        playButton.setImageResource(R.drawable.baseline_play_arrow_24);
+                        timer.stop();
+                        timer.setBase(SystemClock.elapsedRealtime());
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }

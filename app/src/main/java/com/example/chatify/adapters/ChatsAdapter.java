@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.example.chatify.R;
 import com.example.chatify.model.chat.Chats;
@@ -181,11 +182,13 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public static class ViewHolderVoiceLeft extends RecyclerView.ViewHolder {
         ImageButton playButton;
         Chronometer timer;
+        LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
 
         public ViewHolderVoiceLeft(@NonNull View itemView) {
             super(itemView);
             playButton = itemView.findViewById(R.id.btn_play_voiceLeft);
             timer = itemView.findViewById(R.id.txt_voice_durationLeft);
+            lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
         }
     }
 
@@ -193,32 +196,51 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public static class ViewHolderVoiceRight extends RecyclerView.ViewHolder {
         ImageButton playButton;
         Chronometer timer;
+        LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
 
         public ViewHolderVoiceRight(@NonNull View itemView) {
             super(itemView);
             playButton = itemView.findViewById(R.id.btn_play_voice);
             timer = itemView.findViewById(R.id.txt_voice_duration);
+            lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
         }
     }
+
 
     // ✅ MediaPlayer logic with Chronometer
     private void setupVoicePlayer(RecyclerView.ViewHolder holder, String url) {
         ImageButton playButton;
         Chronometer timer;
+        LottieAnimationView lottieVisualizer = null;  // Initialize null
 
         if (holder instanceof ViewHolderVoiceLeft) {
             playButton = ((ViewHolderVoiceLeft) holder).playButton;
             timer = ((ViewHolderVoiceLeft) holder).timer;
-        } else {
+            lottieVisualizer = ((ViewHolderVoiceLeft) holder).lottieVisualizer;
+
+        } else if (holder instanceof ViewHolderVoiceRight) {
             playButton = ((ViewHolderVoiceRight) holder).playButton;
             timer = ((ViewHolderVoiceRight) holder).timer;
+            lottieVisualizer = ((ViewHolderVoiceRight) holder).lottieVisualizer;
+
+        } else {
+            return;  // Exit if invalid holder
         }
+
+        LottieAnimationView finalLottieVisualizer = lottieVisualizer;  // Final reference for async handling
 
         playButton.setOnClickListener(v -> {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
                 timer.stop();
                 playButton.setImageResource(R.drawable.baseline_play_arrow_24);
+
+                // 🔥 Stop Lottie animation safely
+                if (finalLottieVisualizer != null) {
+                    finalLottieVisualizer.pauseAnimation();
+                    finalLottieVisualizer.setVisibility(View.INVISIBLE);
+                }
+
             } else {
                 try {
                     mediaPlayer.reset();
@@ -231,10 +253,22 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     mediaPlayer.start();
                     playButton.setImageResource(R.drawable.baseline_pause_24);
 
+                    // 🔥 Start Lottie animation safely
+                    if (finalLottieVisualizer != null) {
+                        finalLottieVisualizer.setVisibility(View.VISIBLE);
+                        finalLottieVisualizer.playAnimation();
+                    }
+
                     mediaPlayer.setOnCompletionListener(mp -> {
                         playButton.setImageResource(R.drawable.baseline_play_arrow_24);
                         timer.stop();
                         timer.setBase(SystemClock.elapsedRealtime());
+
+                        // 🔥 Stop Lottie animation safely
+                        if (finalLottieVisualizer != null) {
+                            finalLottieVisualizer.pauseAnimation();
+                            finalLottieVisualizer.setVisibility(View.INVISIBLE);
+                        }
                     });
 
                 } catch (IOException e) {
@@ -243,4 +277,5 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
         });
     }
+
 }

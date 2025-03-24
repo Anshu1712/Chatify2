@@ -277,5 +277,4 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
         });
     }
-
 }

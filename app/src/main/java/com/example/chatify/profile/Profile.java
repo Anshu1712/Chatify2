@@ -307,12 +307,13 @@ public class Profile extends AppCompatActivity {
     }
 
     private void signOut() {
-        // Sign out the user and navigate to SplashActivity
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(Profile.this, SplachActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Clear back stack
         startActivity(intent);
         finish();
     }
+
 
     private void openGallery() {
         Intent intent = new Intent();

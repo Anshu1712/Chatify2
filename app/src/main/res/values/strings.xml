@@ -82,4 +82,7 @@
     <string name="_91_xxxxxxxxxx">+91 xxxxxxxxxx</string>
     <string name="send_image">Send Image</string>
     <string name="play_voice">Play Voice</string>
+    <string name="recent_updates">Recent Updates</string>
+    <string name="add_caption">Add caption</string>
+    <string name="time">Time</string>
 </resources>

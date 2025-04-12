@@ -1,13 +1,16 @@
 package com.example.chatify.profile;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -17,24 +20,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.chatify.MainActivity;
 import com.example.chatify.R;
-import com.example.chatify.common.Common;
 import com.example.chatify.databinding.ActivityProfileBinding;
-import com.example.chatify.display.ViewImageActivity;
 import com.example.chatify.startup.SplachActivity;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -44,7 +41,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Profile extends AppCompatActivity {
@@ -93,34 +95,12 @@ public class Profile extends AppCompatActivity {
     }
 
     private void initActionClick() {
-        binding.fabCamera.setOnClickListener(v -> showButtomSheetPickPhoto());
+        binding.fabCamera.setOnClickListener(v -> showBottomSheetPickPhoto());
 
         binding.nameEdit.setOnClickListener(view -> showButtomSheetEditName());
 
         binding.bioEdit.setOnClickListener(view -> showBioBottomSheet());
 
-//        binding.Change.setOnClickListener(view -> {
-//            // Invalidate the ImageView
-//            binding.Change.invalidate();
-//
-//            // Glide method to get Bitmap from ImageView
-//            Glide.with(Profile.this)
-//                    .asBitmap()  // Request the Bitmap from Glide
-//                    .load(binding.Change.getDrawable())  // Load the ImageView drawable
-//                    .into(new SimpleTarget<Bitmap>() {
-//                        @Override
-//                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-//                            // Save the Bitmap globally in the Common class or any other storage
-//                            Common.IMAGE_BITMAP = resource;
-//
-//                            // Launch the activity with the image transition
-//                            ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat
-//                                    .makeSceneTransitionAnimation(Profile.this, binding.Change, "Name");
-//                            Intent intent = new Intent(Profile.this, ViewImageActivity.class);
-//                            startActivity(intent, activityOptionsCompat.toBundle());
-//                        }
-//                    });
-//        });
         binding.button5.setOnClickListener(view -> showDialogSignOut());
     }
 
@@ -147,20 +127,63 @@ public class Profile extends AppCompatActivity {
         }
     }
 
-    private void showButtomSheetPickPhoto() {
-        if (bottomSheetDialog == null) {
-            bottomSheetDialog = new BottomSheetDialog(this);
-        }
+    private void showBottomSheetPickPhoto() {
+        bottomSheetDialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.botton_sheet, null);
         bottomSheetDialog.setContentView(view);
-        view.findViewById(R.id.gallery).setOnClickListener(view1 -> openGallery());
+
+        view.findViewById(R.id.gallery).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            openGallery();
+        });
+
+        view.findViewById(R.id.camera1).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            checkCameraPermission();
+        });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Objects.requireNonNull(bottomSheetDialog.getWindow()).addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            Objects.requireNonNull(bottomSheetDialog.getWindow())
+                    .addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
-        bottomSheetDialog.setOnDismissListener(dialog -> bottomSheetDialog = null);
         bottomSheetDialog.show();
     }
+
+    private void checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, 221);
+        } else {
+            openCamera();
+        }
+    }
+
+
+    private void openCamera() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+                String imageFileName = "IMG_" + timeStamp;
+                File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                photoFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            if (photoFile != null) {
+                imageUri = FileProvider.getUriForFile(
+                        this,
+                        getPackageName() + ".provider",
+                        photoFile
+                );
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                startActivityForResult(intent, 440);
+            }
+        }
+    }
+
 
     @SuppressLint("MissingInflatedId")
     private void showBioBottomSheet() {
@@ -327,17 +350,14 @@ public class Profile extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == IMAGE_GALLERY_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
             imageUri = data.getData();
-
             uploadToFirebase();
-//            try {
-//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-//                binding.Change.setImageBitmap(bitmap);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+        }
 
+        if (requestCode == 440 && resultCode == RESULT_OK) {
+            if (imageUri != null) {
+                uploadToFirebase();
+            }
         }
     }
 

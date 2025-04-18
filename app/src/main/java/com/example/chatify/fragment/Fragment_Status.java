@@ -28,10 +28,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.example.chatify.R;
+import com.example.chatify.Status.ShowStatus;
 import com.example.chatify.Status.imageActivity;
+import com.example.chatify.adapters.StatusVH;
 import com.example.chatify.databinding.FragmentStatusBinding;
 import com.example.chatify.model.ChatListModel;
-import com.example.chatify.model.StatusModel;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -250,7 +251,30 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                         .setQuery(chatList, ChatListModel.class)
                         .build();
 
-//        FirebaseRecyclerAdapter<ChatListModel> option =
+        FirebaseRecyclerAdapter<ChatListModel, StatusVH> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<ChatListModel, StatusVH>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull StatusVH holder, int position, @NonNull ChatListModel model) {
+
+                holder.fetchStatus(getActivity(), "", "", model.getDate(), model.getLastM(), model.getUserName(), model.getUrlProfile(), model.getUserID());
+
+                String userId = getItem(position).getUserID();
+                holder.nameTv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), ShowStatus.class);
+                        intent.putExtra("uid", userId);
+                        startActivity(intent);
+                    }
+                });
+            }
+
+            @NonNull
+            @Override
+            public StatusVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_chat, parent, false);
+                return new StatusVH(view); // ✅ correct
+            }
+        };
 
     }
 

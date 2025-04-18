@@ -20,7 +20,8 @@ import com.squareup.picasso.Picasso;
 public class StatusVH extends RecyclerView.ViewHolder {
 
     ImageView statusIv;
-    TextView nameTv, timeTv;
+    public TextView nameTv;
+    TextView timeTv;
     String urlResult, deleteResult, timeResult;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference statusRef, lastStatus;
@@ -34,7 +35,7 @@ public class StatusVH extends RecyclerView.ViewHolder {
 
     public void fetchStatus(FragmentActivity application,
                             String key1, String key2,
-                            String key3, String lastm
+                            String key3, String lastM
             , String name, String url,
                             String uid) {
 
@@ -51,7 +52,7 @@ public class StatusVH extends RecyclerView.ViewHolder {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.hasChild(uid)) {
 
-                    statusRef.child(uid).addValueEventListener(new ValueEventListener() {
+                    lastStatus.child(uid).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {

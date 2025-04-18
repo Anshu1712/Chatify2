@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = binding.tabLayout;
         viewPager = binding.viewPager;
 
+        // Set up the adapter for ViewPager
         adapter = new MyAdapter(getSupportFragmentManager(), getLifecycle());
         adapter.addFragment(new chat());
         adapter.addFragment(new Fragment_Status());
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager.setAdapter(adapter);
 
+        // TabLayoutMediator binds TabLayout with ViewPager2
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
@@ -72,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }).attach();
 
+        // Check for the "goToStatus" flag in the intent (from imageActivity)
+        if (getIntent().getBooleanExtra("goToStatus", false)) {
+            viewPager.setCurrentItem(1); // Switch to "Status" tab
+        }
+        // Update FAB behavior based on the selected tab
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {

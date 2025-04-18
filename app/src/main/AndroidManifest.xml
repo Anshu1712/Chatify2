@@ -37,6 +37,9 @@
         android:theme="@style/Theme.Chatify"
         tools:targetApi="31">
         <activity
+            android:name=".Status.ShowStatus"
+            android:exported="false" />
+        <activity
             android:name=".Status.imageActivity"
             android:exported="false" />
         <activity

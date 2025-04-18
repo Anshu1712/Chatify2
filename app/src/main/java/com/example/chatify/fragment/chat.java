@@ -28,8 +28,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class chat extends Fragment {
@@ -134,10 +137,13 @@ public class chat extends Fragment {
                                                 documentSnapshot.getString("userID"),
                                                 documentSnapshot.getString("username"),
                                                 "This is description..",
-                                                "",
+                                                getCurrentTime(),
                                                 documentSnapshot.getString("imageProfile"),
                                                 documentSnapshot.getString("userPhone"),
-                                                documentSnapshot.getString("bio")
+                                                documentSnapshot.getString("bio"),
+                                                documentSnapshot.getString("unSeen"),
+                                                documentSnapshot.getString("0"),
+                                                documentSnapshot.getString("lastM")
                                         );
                                         list.add(chat);
                                     } catch (Exception e) {
@@ -162,6 +168,13 @@ public class chat extends Fragment {
             }
         });
     }
+
+    private String getCurrentTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
+        return sdf.format(Calendar.getInstance().getTime());
+    }
+
+
 
     // Method to handle invite friend button click
     public void onInviteFriendClicked(View view) {

@@ -1,10 +1,10 @@
 package com.example.chatify.Status;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,8 +15,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.chatify.MainActivity;
 import com.example.chatify.R;
-import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.model.StatusModel;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,7 +36,6 @@ import java.util.Calendar;
 
 public class imageActivity extends AppCompatActivity {
 
-
     ImageView imageView;
     String uid;
     EditText captionEt;
@@ -44,7 +43,6 @@ public class imageActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference statusRef, lastStatus;
     StatusModel model;
-    Bitmap bitmap;
     String imageUri;
     ProgressBar pb;
 
@@ -63,13 +61,28 @@ public class imageActivity extends AppCompatActivity {
         lastStatus = database.getReference("Laststatus");
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "User not authenticated!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         uid = user.getUid();
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-
             imageUri = bundle.getString("u");
-            Picasso.get().load(imageUri).into(imageView);
+
+            if (imageUri != null && !imageUri.isEmpty()) {
+                Picasso.get().load(imageUri).into(imageView);
+            } else {
+                Toast.makeText(this, "Image URI not received!", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } else {
+            Toast.makeText(this, "No data received!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -81,11 +94,15 @@ public class imageActivity extends AppCompatActivity {
     }
 
     private void saveStatus() {
+        if (imageUri == null || imageUri.isEmpty()) {
+            Toast.makeText(this, "Image URI is missing!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         pb.setVisibility(View.VISIBLE);
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageReference;
-        storageReference = storage.getReference("statusimages");
+        StorageReference storageReference = storage.getReference("statusimages");
 
         final StorageReference reference = storageReference.child(System.currentTimeMillis() + ".jpg");
 
@@ -115,35 +132,26 @@ public class imageActivity extends AppCompatActivity {
                     model.setDelete(String.valueOf(System.currentTimeMillis()));
                     model.setImage(downloadUri.toString());
                     model.setCaption(captionEt.getText().toString().trim());
-
                     model.setUid(uid);
                     model.setTime(saveDate + " " + saveTime);
 
                     String key = statusRef.push().getKey();
                     statusRef.child(uid).child(key).setValue(model);
-
-
-                    model.setDelete(String.valueOf(System.currentTimeMillis()));
-                    model.setImage(downloadUri.toString());
-                    model.setCaption(captionEt.getText().toString().trim());
-
-                    model.setUid(uid);
-                    model.setTime(saveDate + " " + saveTime);
-
                     lastStatus.child(uid).setValue(model);
 
                     pb.setVisibility(View.GONE);
                     Toast.makeText(imageActivity.this, "Status Uploaded", Toast.LENGTH_SHORT).show();
 
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Intent intent = new Intent(imageActivity.this, Fragment_Status.class);
-                            startActivity(intent);
-                            finish();
-                        }
+                    // Go back to MainActivity and switch to Status tab
+                    new Handler().postDelayed(() -> {
+                        Intent intent = new Intent(imageActivity.this, MainActivity.class);
+                        intent.putExtra("goToStatus", true);
+                        startActivity(intent);
+                        finish();
                     }, 1000);
+                } else {
+                    pb.setVisibility(View.GONE);
+                    Toast.makeText(imageActivity.this, "Upload failed: " + task.getException(), Toast.LENGTH_SHORT).show();
                 }
             }
         });

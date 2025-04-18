@@ -8,13 +8,16 @@ public class ChatListModel {
     private String urlProfile;    // Stores the URL to the user's profile image.
     private String userPhone;// Stores the user's phone number.
     private String UserBio;
+    private String seen;
+    private String mCount;
+    private String lastM;
 
     // Default constructor - an empty constructor required by certain frameworks like Firebase or when no parameters are passed during object creation.
     public ChatListModel() {
     }
 
     // Parameterized constructor - Allows creating an instance of ChatListModel by providing values for all fields.
-    public ChatListModel(String userID, String userName, String description, String date, String urlProfile, String userPhone, String bio) {
+    public ChatListModel(String userID, String userName, String description, String date, String urlProfile, String userPhone, String bio, String seen, String mCount, String lastM) {
         this.userID = userID;          // Initialize the userID with the provided userID.
         this.userName = userName;      // Initialize the userName with the provided userName.
         this.description = description; // Initialize the description with the provided description.
@@ -22,6 +25,9 @@ public class ChatListModel {
         this.urlProfile = urlProfile;  // Initialize the urlProfile with the provided URL of the profile image.
         this.userPhone = userPhone;    // Initialize the userPhone with the provided phone number.
         this.UserBio = bio;
+        this.seen = seen;
+        this.mCount = mCount;
+        this.lastM = lastM;
     }
 
 
@@ -34,6 +40,7 @@ public class ChatListModel {
     public void setUserID(String userID) {
         this.userID = userID;  // Sets the userID field to the provided value.
     }
+
 
     // Getter method for userName - Retrieves the userName value.
     public String getUserName() {
@@ -92,4 +99,29 @@ public class ChatListModel {
     public void setUserBio(String userBio) {
         UserBio = userBio;
     }
+
+    public String getSeen() {
+        return seen;
+    }
+
+    public void setSeen(String seen) {
+        this.seen = seen;
+    }
+
+    public String getmCount() {
+        return mCount;
+    }
+
+    public void setmCount(String mCount) {
+        this.mCount = mCount;
+    }
+
+    public String getLastM() {
+        return lastM;
+    }
+
+    public void setLastM(String lastM) {
+        this.lastM = lastM;
+    }
+
 }

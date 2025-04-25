@@ -83,9 +83,9 @@ public class chat extends Fragment {
     // Method to get chat list from Firebase Realtime Database
     private void getChatList() {
         // Hide progress and show invite friends section if there are no chats
-        binding.progressCircular.setVisibility(View.GONE);
+        binding.progressCircular.setVisibility(View.VISIBLE);
         binding.recyclerView.setVisibility(View.GONE); // Hide chat list
-        binding.inInvite.setVisibility(View.VISIBLE); // Show invite friends section
+        binding.inInvite.setVisibility(View.GONE); // Show invite friends section
 
         reference.child("ChatList").child(firebaseUser.getUid())
                 .addValueEventListener(new ValueEventListener() {
@@ -103,7 +103,7 @@ public class chat extends Fragment {
                         // If no chat data is found, show the invite section and hide progress
                         if (allUserID.isEmpty()) {
                             binding.recyclerView.setVisibility(View.GONE); // Hide chat list
-                            binding.inInvite.setVisibility(View.VISIBLE); // Show invite friends section
+                            binding.progressCircular.setVisibility(View.VISIBLE); // Show invite friends section
                         } else {
                             getUserInfo();
                         }

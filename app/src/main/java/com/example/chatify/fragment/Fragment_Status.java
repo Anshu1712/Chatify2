@@ -53,10 +53,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     private static final int REQUEST_STORAGE_PERMISSION = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int REQUEST_GALLERY = 102;
-
     TextView tapToAddTv, myStatus;
     String uid, url, time, delete;
-
     private FirebaseDatabase database;
     private DatabaseReference statusRef, chatList;
     private FirebaseFirestore firestore;
@@ -94,7 +92,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
 
         tapToAddTv = binding.tvMessage;
         myStatus = binding.tvName;
-        statusRef = database.getReference("lastStatus");
+        statusRef = database.getReference("Laststatus");
 
         binding.statusRecycle.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.statusRecycle.setHasFixedSize(true);
@@ -271,7 +269,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
             @NonNull
             @Override
             public StatusVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_chat, parent, false);
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.status_item, parent, false);
                 return new StatusVH(view); // ✅ correct
             }
         };

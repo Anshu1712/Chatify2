@@ -72,7 +72,7 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
         captionTv = findViewById(R.id.StoryCap_tv);
         timeTv = findViewById(R.id.tv_time_ss);
 
-        lastStatus = database.getReference("laststatus");
+        lastStatus = database.getReference("Laststatus");
 
         model = new StatusModel();
         View reverse = findViewById(R.id.viewnext);
@@ -95,6 +95,15 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
 
         reverse.setOnTouchListener(onTouchListener);
 
+        reverse.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                storiesProgressView.pause();
+                return false;
+            }
+        });
+
+
         View skip = findViewById(R.id.viewprev);
         skip.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,8 +111,8 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
                 storiesProgressView.reverse();
             }
         });
-        skip.setOnTouchListener(onTouchListener);
 
+        skip.setOnTouchListener(onTouchListener);
 
         skip.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -164,7 +173,7 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
                 storiesProgressView.setStoriesCount(image.size());
                 storiesProgressView.setStoriesListener(ShowStatus.this);
                 storiesProgressView.startStories(counter);
-                storiesProgressView.setStoryDuration(5000L);
+                storiesProgressView.setStoryDuration(10000L);
 
 
                 s_iv.setVisibility(View.VISIBLE);
@@ -192,16 +201,16 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.getResult().exists()) {
-                    String name = task.getResult().getString("name");
+                    String name = task.getResult().getString("username");
                     String about = task.getResult().getString("about");
                     String phone = task.getResult().getString("phone");
-                    String url = task.getResult().getString("url");
+                    String url = task.getResult().getString("imageProfile");
 
                     if (url.equals("")) {
                         tvName.setText(name);
                     } else {
                         tvName.setText(name);
-                        Picasso.get().load(url).into(s_iv);
+                        Picasso.get().load(url).into(userIv);
                     }
                 } else {
                     Toast.makeText(ShowStatus.this, "no data found", Toast.LENGTH_SHORT).show();
@@ -217,7 +226,7 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
 
     @Override
     public void onPrev() {
-        if ((counter - 1) < 0)return;
+        if ((counter - 1) < 0) return;
         Picasso.get().load(image.get(--counter)).into(s_iv);
         captionTv.setText(caption.get(counter));
     }

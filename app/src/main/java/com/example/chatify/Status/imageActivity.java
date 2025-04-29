@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chatify.MainActivity;
 import com.example.chatify.R;
+import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.model.StatusModel;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -135,20 +138,45 @@ public class imageActivity extends AppCompatActivity {
                     model.setUid(uid);
                     model.setTime(saveDate + " " + saveTime);
 
-                    String key = statusRef.push().getKey();
-                    statusRef.child(uid).child(key).setValue(model);
-                    lastStatus.child(uid).setValue(model);
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
 
-                    pb.setVisibility(View.GONE);
-                    Toast.makeText(imageActivity.this, "Status Uploaded", Toast.LENGTH_SHORT).show();
+                    String uid = auth.getCurrentUser().getUid().toString();
+                    FirebaseFirestore.getInstance().collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    String name = document.getString("username");
+                                    Log.e("FireStore", "name : "+name);
+                                    model.setName(name);
+                                    String key = statusRef.push().getKey();
+                                    statusRef.child(uid).child(key).setValue(model);
+                                    lastStatus.child(uid).setValue(model);
 
-                    // Go back to MainActivity and switch to Status tab
-                    new Handler().postDelayed(() -> {
-                        Intent intent = new Intent(imageActivity.this, MainActivity.class);
-                        intent.putExtra("goToStatus", true);
-                        startActivity(intent);
-                        finish();
-                    }, 1000);
+                                    pb.setVisibility(View.GONE);
+                                    Toast.makeText(imageActivity.this, "Status Uploaded you know", Toast.LENGTH_SHORT).show();
+
+
+                                    // Go back to MainActivity and switch to Status tab
+                                    new Handler().postDelayed(() -> {
+                                        Intent intent = new Intent(imageActivity.this, MainActivity.class);
+                                        intent.putExtra("goToStatus", true);
+                                        startActivity(intent);
+                                        finish();
+                                    }, 1000);
+                                } else {
+                                    Log.e("FireStore", "document missing : "+true);
+                                }
+                            } else {
+                                Log.e("FireStore", "failed");
+                            }
+                        }
+                    });
+
+                    //pb.setVisibility(View.GONE);
+                    //Toast.makeText(imageActivity.this, "Status Uploaded", Toast.LENGTH_SHORT).show();
+
                 } else {
                     pb.setVisibility(View.GONE);
                     Toast.makeText(imageActivity.this, "Upload failed: " + task.getException(), Toast.LENGTH_SHORT).show();

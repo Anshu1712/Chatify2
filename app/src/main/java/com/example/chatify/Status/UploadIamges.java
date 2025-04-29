@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,17 +22,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import com.example.chatify.MainActivity;
 import com.example.chatify.R;
 import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.model.StatusModel;
+import com.example.chatify.model.Users;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -144,32 +152,43 @@ public class UploadIamges extends AppCompatActivity {
 
                     model.setUid(uid);
                     model.setTime(saveDate + " " + saveTime);
-
                     String key = statusRef.push().getKey();
-                    statusRef.child(uid).child(key).setValue(model);
 
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
 
-                    model.setDelete(String.valueOf(System.currentTimeMillis()));
-                    model.setImage(downloadUri.toString());
-                    model.setCaption(captionEt.getText().toString().trim());
-
-                    model.setUid(uid);
-                    model.setTime(saveDate + " " + saveTime);
-
-                    lastStatus.child(uid).setValue(model);
-
-                    pb.setVisibility(View.GONE);
-                    Toast.makeText(UploadIamges.this, "Status Uploaded", Toast.LENGTH_SHORT).show();
-
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
+                    String uid = auth.getCurrentUser().getUid().toString();
+                    FirebaseFirestore.getInstance().collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
-                        public void run() {
-                            Intent intent = new Intent(UploadIamges.this, Fragment_Status.class);
-                            startActivity(intent);
-                            finish();
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    String name = document.getString("username");
+                                    Log.e("FireStore", "name : "+name);
+                                    model.setName(name);
+                                    statusRef.child(uid).child(key).setValue(model);
+                                    lastStatus.child(uid).setValue(model);
+
+                                    pb.setVisibility(View.GONE);
+                                    Toast.makeText(UploadIamges.this, "Status Uploaded you know", Toast.LENGTH_SHORT).show();
+
+                                    Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Intent intent = new Intent(UploadIamges.this, Fragment_Status.class);
+                                            startActivity(intent);
+                                            //finish();
+                                        }
+                                    }, 1000);
+                                } else {
+                                    Log.e("FireStore", "document missing : "+true);
+                                }
+                            } else {
+                                Log.e("FireStore", "failed");
+                            }
                         }
-                    }, 1000);
+                    });
                 }
             }
         });

@@ -1,10 +1,18 @@
 package com.example.chatify.model;
 
 public class StatusModel {
-    String image, time, delete, uid, caption;
+    String image, time, delete, uid, caption,name;
 
     public StatusModel() {
 
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getImage() {

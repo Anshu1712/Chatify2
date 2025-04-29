@@ -19,8 +19,8 @@ import com.squareup.picasso.Picasso;
 
 public class StatusVH extends RecyclerView.ViewHolder {
 
-    ImageView statusIv;
     public TextView nameTv;
+    ImageView statusIv;
     TextView timeTv;
     String urlResult, deleteResult, timeResult;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -49,7 +49,7 @@ public class StatusVH extends RecyclerView.ViewHolder {
 
         lastStatus.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void  onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.hasChild(uid)) {
 
                     lastStatus.child(uid).addValueEventListener(new ValueEventListener() {

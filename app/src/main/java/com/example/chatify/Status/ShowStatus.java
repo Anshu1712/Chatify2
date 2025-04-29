@@ -73,7 +73,6 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
         timeTv = findViewById(R.id.tv_time_ss);
 
 
-
         lastStatus = database.getReference("Laststatus");
 
         model = new StatusModel();

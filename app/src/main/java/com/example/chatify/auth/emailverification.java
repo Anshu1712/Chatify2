@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class emailverification extends AppCompatActivity {
 
 
+    private static final long COOLDOWN_TIME = 30000; // 30 seconds cooldown
     private EditText email;
     private MaterialButton registerButton, resendButton;
     private FirebaseFirestore firestore;
@@ -27,7 +28,6 @@ public class emailverification extends AppCompatActivity {
     private EditText number1, number2;
     private FirebaseAuth auth;
     private long lastSentTime = 0;
-    private static final long COOLDOWN_TIME = 30000; // 30 seconds cooldown
     private CountDownTimer countDownTimer;
 
     @SuppressLint("MissingInflatedId")

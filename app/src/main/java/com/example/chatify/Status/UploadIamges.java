@@ -22,22 +22,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.chatify.MainActivity;
 import com.example.chatify.R;
 import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.model.StatusModel;
-import com.example.chatify.model.Users;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -54,7 +49,6 @@ public class UploadIamges extends AppCompatActivity {
 
     ImageView imageView;
     ImageView openCameraTv;
-    private String currentPhotoPath;
     String uid;
     EditText captionEt;
     FloatingActionButton sendBtn;
@@ -63,6 +57,7 @@ public class UploadIamges extends AppCompatActivity {
     StatusModel model;
     Bitmap bitmap;
     ProgressBar pb;
+    private String currentPhotoPath;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -164,7 +159,7 @@ public class UploadIamges extends AppCompatActivity {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
                                     String name = document.getString("username");
-                                    Log.e("FireStore", "name : "+name);
+                                    Log.e("FireStore", "name : " + name);
                                     model.setName(name);
                                     statusRef.child(uid).child(key).setValue(model);
                                     lastStatus.child(uid).setValue(model);
@@ -182,7 +177,7 @@ public class UploadIamges extends AppCompatActivity {
                                         }
                                     }, 1000);
                                 } else {
-                                    Log.e("FireStore", "document missing : "+true);
+                                    Log.e("FireStore", "document missing : " + true);
                                 }
                             } else {
                                 Log.e("FireStore", "failed");

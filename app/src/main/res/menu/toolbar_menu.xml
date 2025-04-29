@@ -4,25 +4,19 @@
 
     <item
         android:id="@+id/action_search1"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="always"
         android:icon="@drawable/baseline_search_24"
         android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:iconTint="?attr/colorOnPrimary"
+        app:showAsAction="always"
         app:titleTextColor="?attr/colorOnPrimary" />
 
     <group android:id="@+id/action_more">
 
         <item
-            android:id="@+id/action_new_group"
-            app:showAsAction="never"
-            android:title="@string/new_group"
-            app:titleTextColor="?attr/colorOnPrimary" />
-
-        <item
             android:id="@+id/action_settings"
-            app:showAsAction="never"
             android:title="@string/setting"
+            app:showAsAction="never"
             app:titleTextColor="?attr/colorOnPrimary" />
 
     </group>

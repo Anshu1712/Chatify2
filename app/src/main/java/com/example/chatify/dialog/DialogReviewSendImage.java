@@ -1,7 +1,6 @@
 package com.example.chatify.dialog;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;

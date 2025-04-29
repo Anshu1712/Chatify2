@@ -52,6 +52,8 @@ import java.util.concurrent.TimeUnit;
 public class ChatActivity extends AppCompatActivity {
 
     private static final int REQUEST_CORD_PERMISSION = 332;
+    private static final int IMAGE_GALLERY_REQUEST = 111;
+    private static final int PERMISSION_CODE = 101;
     private ActivityChatBinding binding;
     private String receiverID;
     private String audioPath, userProfile, userName, userPhone, UserBio;
@@ -59,10 +61,7 @@ public class ChatActivity extends AppCompatActivity {
     private List<Chats> list = new ArrayList<>();
     private boolean isActionShown = false;
     private ChatService chatService;
-    private static final int IMAGE_GALLERY_REQUEST = 111;
     private Uri imageUri;
-
-    private static final int PERMISSION_CODE = 101;
     private MediaRecorder mediaRecorder;
 
 

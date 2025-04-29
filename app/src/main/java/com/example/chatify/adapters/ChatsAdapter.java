@@ -28,15 +28,14 @@ import java.util.List;
 
 public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Chats> list;
-    private Context context;
     private static final int MSG_TEXT_LEFT = 0;
     private static final int MSG_TEXT_RIGHT = 1;
     private static final int MSG_IMAGE_LEFT = 2;
     private static final int MSG_IMAGE_RIGHT = 3;
     private static final int MSG_VOICE_LEFT = 4;
     private static final int MSG_VOICE_RIGHT = 5;
-
+    private List<Chats> list;
+    private Context context;
     private FirebaseUser firebaseUser;
     private MediaPlayer mediaPlayer;
     private ImageButton lastButton;
@@ -138,75 +137,6 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         throw new IllegalArgumentException("Unknown message type");
     }
 
-    // ✅ ViewHolder for Text (Left - Receiver)
-    public static class ViewHolderTextLeft extends RecyclerView.ViewHolder {
-        TextView textMessage;
-
-        public ViewHolderTextLeft(@NonNull View itemView) {
-            super(itemView);
-            textMessage = itemView.findViewById(R.id.txtLift);
-        }
-    }
-
-    // ✅ ViewHolder for Text (Right - Sender)
-    public static class ViewHolderTextRight extends RecyclerView.ViewHolder {
-        TextView textMessage;
-
-        public ViewHolderTextRight(@NonNull View itemView) {
-            super(itemView);
-            textMessage = itemView.findViewById(R.id.txtRight);
-        }
-    }
-
-    // ✅ ViewHolder for Image (Left - Receiver)
-    public static class ViewHolderImageLeft extends RecyclerView.ViewHolder {
-        ImageView imageMessage;
-
-        public ViewHolderImageLeft(@NonNull View itemView) {
-            super(itemView);
-            imageMessage = itemView.findViewById(R.id.image_chatLeft);
-        }
-    }
-
-    // ✅ ViewHolder for Image (Right - Sender)
-    public static class ViewHolderImageRight extends RecyclerView.ViewHolder {
-        ImageView imageMessage;
-
-        public ViewHolderImageRight(@NonNull View itemView) {
-            super(itemView);
-            imageMessage = itemView.findViewById(R.id.image_chat);
-        }
-    }
-
-    // ✅ ViewHolder for Voice (Left - Receiver)
-    public static class ViewHolderVoiceLeft extends RecyclerView.ViewHolder {
-        ImageButton playButton;
-        Chronometer timer;
-        LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
-
-        public ViewHolderVoiceLeft(@NonNull View itemView) {
-            super(itemView);
-            playButton = itemView.findViewById(R.id.btn_play_voiceLeft);
-            timer = itemView.findViewById(R.id.txt_voice_durationLeft);
-            lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
-        }
-    }
-
-    // ✅ ViewHolder for Voice (Right - Sender)
-    public static class ViewHolderVoiceRight extends RecyclerView.ViewHolder {
-        ImageButton playButton;
-        Chronometer timer;
-        LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
-
-        public ViewHolderVoiceRight(@NonNull View itemView) {
-            super(itemView);
-            playButton = itemView.findViewById(R.id.btn_play_voice);
-            timer = itemView.findViewById(R.id.txt_voice_duration);
-            lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
-        }
-    }
-
-
     // ✅ MediaPlayer logic with Chronometer
     private void setupVoicePlayer(RecyclerView.ViewHolder holder, String url) {
         ImageButton playButton;
@@ -276,5 +206,73 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
             }
         });
+    }
+
+    // ✅ ViewHolder for Text (Left - Receiver)
+    public static class ViewHolderTextLeft extends RecyclerView.ViewHolder {
+        TextView textMessage;
+
+        public ViewHolderTextLeft(@NonNull View itemView) {
+            super(itemView);
+            textMessage = itemView.findViewById(R.id.txtLift);
+        }
+    }
+
+    // ✅ ViewHolder for Text (Right - Sender)
+    public static class ViewHolderTextRight extends RecyclerView.ViewHolder {
+        TextView textMessage;
+
+        public ViewHolderTextRight(@NonNull View itemView) {
+            super(itemView);
+            textMessage = itemView.findViewById(R.id.txtRight);
+        }
+    }
+
+    // ✅ ViewHolder for Image (Left - Receiver)
+    public static class ViewHolderImageLeft extends RecyclerView.ViewHolder {
+        ImageView imageMessage;
+
+        public ViewHolderImageLeft(@NonNull View itemView) {
+            super(itemView);
+            imageMessage = itemView.findViewById(R.id.image_chatLeft);
+        }
+    }
+
+    // ✅ ViewHolder for Image (Right - Sender)
+    public static class ViewHolderImageRight extends RecyclerView.ViewHolder {
+        ImageView imageMessage;
+
+        public ViewHolderImageRight(@NonNull View itemView) {
+            super(itemView);
+            imageMessage = itemView.findViewById(R.id.image_chat);
+        }
+    }
+
+    // ✅ ViewHolder for Voice (Left - Receiver)
+    public static class ViewHolderVoiceLeft extends RecyclerView.ViewHolder {
+        ImageButton playButton;
+        Chronometer timer;
+        LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
+
+        public ViewHolderVoiceLeft(@NonNull View itemView) {
+            super(itemView);
+            playButton = itemView.findViewById(R.id.btn_play_voiceLeft);
+            timer = itemView.findViewById(R.id.txt_voice_durationLeft);
+            lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
+        }
+    }
+
+    // ✅ ViewHolder for Voice (Right - Sender)
+    public static class ViewHolderVoiceRight extends RecyclerView.ViewHolder {
+        ImageButton playButton;
+        Chronometer timer;
+        LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
+
+        public ViewHolderVoiceRight(@NonNull View itemView) {
+            super(itemView);
+            playButton = itemView.findViewById(R.id.btn_play_voice);
+            timer = itemView.findViewById(R.id.txt_voice_duration);
+            lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
+        }
     }
 }

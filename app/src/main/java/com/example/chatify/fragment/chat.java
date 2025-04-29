@@ -175,7 +175,6 @@ public class chat extends Fragment {
     }
 
 
-
     // Method to handle invite friend button click
     public void onInviteFriendClicked(View view) {
         // Handle the logic for inviting a friend, such as opening a contact picker

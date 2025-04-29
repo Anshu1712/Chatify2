@@ -1,13 +1,9 @@
 package com.example.chatify.display;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
-import com.example.chatify.R;
 import com.example.chatify.common.Common;
 import com.example.chatify.databinding.ActivityViewImageBinding;
 

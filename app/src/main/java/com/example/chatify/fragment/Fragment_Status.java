@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bumptech.glide.Glide;
 import com.example.chatify.R;
 import com.example.chatify.Status.ShowStatus;
-import com.example.chatify.Status.UploadIamges;
 import com.example.chatify.Status.imageActivity;
 import com.example.chatify.adapters.StatusAdapter;
 import com.example.chatify.adapters.StatusVH;
@@ -54,13 +53,13 @@ import java.util.List;
 
 public class Fragment_Status extends Fragment implements View.OnClickListener {
 
-    private FragmentStatusBinding binding;
-    private Uri imageUri;
     private static final int REQUEST_STORAGE_PERMISSION = 100;
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int REQUEST_GALLERY = 102;
     TextView tapToAddTv, myStatus;
     String uid, url, time, delete;
+    private FragmentStatusBinding binding;
+    private Uri imageUri;
     private FirebaseDatabase database;
     private DatabaseReference statusRef, chatList;
     private FirebaseFirestore firestore;
@@ -105,22 +104,22 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
         List<StatusModel> status_list = new ArrayList<>();
         binding.statusRecycle.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.statusRecycle.setHasFixedSize(true);
-        statusAdapter = new StatusAdapter(getContext(),status_list);
+        statusAdapter = new StatusAdapter(getContext(), status_list);
         binding.statusRecycle.setAdapter(statusAdapter);
 
         FirebaseDatabase.getInstance().getReference().child("Status").child(FirebaseAuth.getInstance().getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
+                if (snapshot.exists()) {
                     status_list.clear();
                     StatusModel statusModel = null;
-                    for(DataSnapshot child : snapshot.getChildren()){
+                    for (DataSnapshot child : snapshot.getChildren()) {
                         statusModel = child.getValue(StatusModel.class);
                         break;
                     }
-                    if(statusModel !=null ){
+                    if (statusModel != null) {
                         status_list.add(statusModel);
-                        Log.d("status_link", "onDataChange: "+statusModel.getImage());
+                        Log.d("status_link", "onDataChange: " + statusModel.getImage());
                     }
                     statusAdapter.notifyDataSetChanged();
                 }

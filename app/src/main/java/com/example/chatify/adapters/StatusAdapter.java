@@ -13,7 +13,6 @@ import com.example.chatify.R;
 import com.example.chatify.model.StatusModel;
 import com.squareup.picasso.Picasso;
 
-import java.sql.Ref;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -22,7 +21,8 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
 
     private Context context;
     private List<StatusModel> list;
-    public StatusAdapter(Context context,List<StatusModel> list){
+
+    public StatusAdapter(Context context, List<StatusModel> list) {
         this.context = context;
         this.list = list;
     }
@@ -30,7 +30,7 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.status_item,parent,false));
+        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.status_item, parent, false));
     }
 
     @Override
@@ -46,12 +46,13 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private CircleImageView circleImageView;
-        private TextView name,instance;
+        private TextView name, instance;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            circleImageView  = itemView.findViewById(R.id.image_profile_item);
+            circleImageView = itemView.findViewById(R.id.image_profile_item);
             name = itemView.findViewById(R.id.tv_name_item);
             instance = itemView.findViewById(R.id.tv_message_item);
         }

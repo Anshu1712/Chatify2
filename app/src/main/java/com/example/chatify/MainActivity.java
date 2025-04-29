@@ -2,7 +2,6 @@ package com.example.chatify;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,36 +14,27 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.chatify.adapters.MyAdapter;
 import com.example.chatify.contacts.AddContact;
-import com.example.chatify.contacts.NewGroup;
 import com.example.chatify.databinding.ActivityMainBinding;
-import com.example.chatify.fragment.Call;
 import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.fragment.chat;
-import com.example.chatify.model.Users;
 import com.example.chatify.setting.SettingsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.auth.User;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static FloatingActionButton floatingActionButton;
+    public static String nameAdmin;
+    public FirebaseDatabase database;
+    public FirebaseAuth auth;
     private ActivityMainBinding binding;
     private ViewPager2 viewPager;
     private Toolbar toolbar;
     private MyAdapter adapter;
-    public static FloatingActionButton floatingActionButton;
     private TabLayout tabLayout;
-
-    public static String nameAdmin;
-    public FirebaseDatabase database;
-
-    public FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         adapter = new MyAdapter(getSupportFragmentManager(), getLifecycle());
         adapter.addFragment(new chat());
         adapter.addFragment(new Fragment_Status());
-        adapter.addFragment(new Call());
 
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager.setAdapter(adapter);
@@ -80,10 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 case 1:
                     tab.setIcon(R.drawable.baseline_data_usage_24);
                     tab.setText("Status");
-                    break;
-                case 2:
-                    tab.setIcon(R.drawable.baseline_call_24);
-                    tab.setText("Call");
                     break;
             }
         }).attach();
@@ -129,10 +114,6 @@ public class MainActivity extends AppCompatActivity {
             Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(settingsIntent);
             return true;
-        } else if (id == R.id.action_new_group) {
-            Intent newGroupIntent = new Intent(MainActivity.this, NewGroup.class);
-            startActivity(newGroupIntent);
-            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -142,19 +123,11 @@ public class MainActivity extends AppCompatActivity {
         switch (position) {
             case 0: // Chat
                 floatingActionButton.setImageResource(R.drawable.baseline_add_24);
-                binding.btnAddStatus.setVisibility(View.GONE);
                 playFabPopupAnimation();
                 break;
 
             case 1: // Status
                 floatingActionButton.setImageResource(R.drawable.baseline_camera_alt_24);
-                binding.btnAddStatus.setVisibility(View.VISIBLE);
-                playFabPopupAnimation();
-                break;
-
-            case 2: // Call
-                floatingActionButton.setImageResource(R.drawable.baseline_call_24);
-                binding.btnAddStatus.setVisibility(View.GONE);
                 playFabPopupAnimation();
                 break;
 
@@ -183,8 +156,6 @@ public class MainActivity extends AppCompatActivity {
             } else if (index == 1) {
                 Toast.makeText(getApplicationContext(), "Camera clicked", Toast.LENGTH_SHORT).show();
                 // TODO: startActivity(new Intent(MainActivity.this, CreateStatusActivity.class));
-            } else if (index == 2) {
-                Toast.makeText(getApplicationContext(), "Call clicked", Toast.LENGTH_SHORT).show();
             }
         });
     }

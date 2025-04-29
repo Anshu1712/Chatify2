@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chatify.MainActivity;
 import com.example.chatify.R;
-import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.model.StatusModel;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -148,7 +147,7 @@ public class imageActivity extends AppCompatActivity {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
                                     String name = document.getString("username");
-                                    Log.e("FireStore", "name : "+name);
+                                    Log.e("FireStore", "name : " + name);
                                     model.setName(name);
                                     String key = statusRef.push().getKey();
                                     statusRef.child(uid).child(key).setValue(model);
@@ -166,7 +165,7 @@ public class imageActivity extends AppCompatActivity {
                                         finish();
                                     }, 1000);
                                 } else {
-                                    Log.e("FireStore", "document missing : "+true);
+                                    Log.e("FireStore", "document missing : " + true);
                                 }
                             } else {
                                 Log.e("FireStore", "failed");

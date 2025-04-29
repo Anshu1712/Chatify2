@@ -28,14 +28,13 @@ import java.util.List;
 
 public class AddContact extends AppCompatActivity {
 
+    public static final int REQUEST_READ_CONTACTS = 79;
     private static final String TAG = "AddContact";
     private ActivityAddContactBinding binding;
     private List<Users> list = new ArrayList<>();
     private ContactAdapter adapter;
     private FirebaseUser firebaseUser;
     private FirebaseFirestore firestore;
-
-    public static final int REQUEST_READ_CONTACTS = 79;
     private ArrayList<String> mobileArray;
 
     @Override

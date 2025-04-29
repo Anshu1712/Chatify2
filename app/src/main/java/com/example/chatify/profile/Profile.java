@@ -51,6 +51,7 @@ import java.util.Objects;
 
 public class Profile extends AppCompatActivity {
 
+    private static final int IMAGE_GALLERY_REQUEST = 111;
     private ActivityProfileBinding binding;
     private FirebaseUser firebaseUser;
     private ImageView backButton1;
@@ -59,7 +60,6 @@ public class Profile extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomSheetDialog bottomSheetDialog, bsDialogEditName, bsDialog;
     private Uri imageUri;
-    private static final int IMAGE_GALLERY_REQUEST = 111;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

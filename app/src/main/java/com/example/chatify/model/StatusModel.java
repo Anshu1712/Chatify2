@@ -1,7 +1,7 @@
 package com.example.chatify.model;
 
 public class StatusModel {
-    String image, time, delete, uid, caption,name;
+    String image, time, delete, uid, caption, name;
 
     public StatusModel() {
 

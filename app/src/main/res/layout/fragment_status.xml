@@ -114,6 +114,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/statusRecycle"
             android:layout_width="match_parent"
+            tools:listitem="@layout/status_item"
             android:layout_height="match_parent"
             android:layout_marginStart="5dp"
             android:layout_marginTop="2dp"

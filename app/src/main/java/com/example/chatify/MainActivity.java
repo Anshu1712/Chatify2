@@ -2,6 +2,7 @@ package com.example.chatify;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,10 +20,17 @@ import com.example.chatify.databinding.ActivityMainBinding;
 import com.example.chatify.fragment.Call;
 import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.fragment.chat;
+import com.example.chatify.model.Users;
 import com.example.chatify.setting.SettingsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.auth.User;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +40,11 @@ public class MainActivity extends AppCompatActivity {
     private MyAdapter adapter;
     public static FloatingActionButton floatingActionButton;
     private TabLayout tabLayout;
+
+    public static String nameAdmin;
+    public FirebaseDatabase database;
+
+    public FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton = binding.addContactnew;
         tabLayout = binding.tabLayout;
         viewPager = binding.viewPager;
+
 
         // Set up the adapter for ViewPager
         adapter = new MyAdapter(getSupportFragmentManager(), getLifecycle());

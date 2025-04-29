@@ -29,10 +29,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bumptech.glide.Glide;
 import com.example.chatify.R;
 import com.example.chatify.Status.ShowStatus;
+import com.example.chatify.Status.UploadIamges;
 import com.example.chatify.Status.imageActivity;
+import com.example.chatify.adapters.StatusAdapter;
 import com.example.chatify.adapters.StatusVH;
 import com.example.chatify.databinding.FragmentStatusBinding;
 import com.example.chatify.model.ChatListModel;
+import com.example.chatify.model.StatusModel;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -45,6 +48,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Fragment_Status extends Fragment implements View.OnClickListener {
 
@@ -59,6 +65,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     private DatabaseReference statusRef, chatList;
     private FirebaseFirestore firestore;
     private FirebaseUser firebaseUser;
+
+    private StatusAdapter statusAdapter;
 
     public Fragment_Status() {
     }
@@ -94,14 +102,41 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
         myStatus = binding.tvName;
         statusRef = database.getReference("Laststatus");
 
+        List<StatusModel> status_list = new ArrayList<>();
         binding.statusRecycle.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.statusRecycle.setHasFixedSize(true);
+        statusAdapter = new StatusAdapter(getContext(),status_list);
+        binding.statusRecycle.setAdapter(statusAdapter);
+
+        FirebaseDatabase.getInstance().getReference().child("Status").child(FirebaseAuth.getInstance().getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    status_list.clear();
+                    StatusModel statusModel = null;
+                    for(DataSnapshot child : snapshot.getChildren()){
+                        statusModel = child.getValue(StatusModel.class);
+                        break;
+                    }
+                    if(statusModel !=null ){
+                        status_list.add(statusModel);
+                        Log.d("status_link", "onDataChange: "+statusModel.getImage());
+                    }
+                    statusAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         tapToAddTv.setOnClickListener(this);
         myStatus.setOnClickListener(this);
         statusRef.keepSynced(true);
 
-        chatList = database.getReference("chat list").child(uid);
+        chatList = database.getReference("ChatList").child(uid);
 
         checkPermission();
         fetchStatus();
@@ -151,6 +186,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                     tapToAddTv.setText(time != null ? time : "No time");
                     binding.imageProfile.setPadding(0, 0, 0, 0);
                 }
+                Log.d("data fetched success", "onDataChange: ");
             }
 
             @Override

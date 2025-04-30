@@ -107,29 +107,56 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
         statusAdapter = new StatusAdapter(getContext(), status_list);
         binding.statusRecycle.setAdapter(statusAdapter);
 
-        FirebaseDatabase.getInstance().getReference().child("Status").child(FirebaseAuth.getInstance().getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
+//        FirebaseDatabase.getInstance().getReference().child("Status").child(FirebaseAuth.getInstance().getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                if (snapshot.exists()) {
+//                    status_list.clear();
+//                    StatusModel statusModel = null;
+//                    for (DataSnapshot child : snapshot.getChildren()) {
+//                        statusModel = child.getValue(StatusModel.class);
+//                        break;
+//                    }
+//                    if (statusModel != null) {
+//                        status_list.add(statusModel);
+//                        Log.d("status_link", "onDataChange: " + statusModel.getImage());
+//                    }
+//                    statusAdapter.notifyDataSetChanged();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+
+        DatabaseReference allStatusRef = FirebaseDatabase.getInstance().getReference().child("Status");
+        allStatusRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    status_list.clear();
-                    StatusModel statusModel = null;
-                    for (DataSnapshot child : snapshot.getChildren()) {
-                        statusModel = child.getValue(StatusModel.class);
-                        break;
+                status_list.clear(); // clear previous data
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    String userId = userSnapshot.getKey();
+                    if (userId != null && !userId.equals(uid)) { // exclude current user's status
+                        for (DataSnapshot statusSnap : userSnapshot.getChildren()) {
+                            StatusModel statusModel = statusSnap.getValue(StatusModel.class);
+                            if (statusModel != null) {
+                                status_list.add(statusModel);
+                                break; // only show the latest status for each user (optional)
+                            }
+                        }
                     }
-                    if (statusModel != null) {
-                        status_list.add(statusModel);
-                        Log.d("status_link", "onDataChange: " + statusModel.getImage());
-                    }
-                    statusAdapter.notifyDataSetChanged();
                 }
+                statusAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Log.e("StatusError", "Failed to load other users' statuses: " + error.getMessage());
             }
         });
+
 
         tapToAddTv.setOnClickListener(this);
         myStatus.setOnClickListener(this);

@@ -60,7 +60,7 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+//        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_show_status);
 
         storiesProgressView = findViewById(R.id.stories);

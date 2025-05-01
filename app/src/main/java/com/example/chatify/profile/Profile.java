@@ -31,6 +31,7 @@ import androidx.core.content.FileProvider;
 import com.bumptech.glide.Glide;
 import com.example.chatify.MainActivity;
 import com.example.chatify.R;
+import com.example.chatify.adapters.showImage;
 import com.example.chatify.databinding.ActivityProfileBinding;
 import com.example.chatify.startup.SplachActivity;
 import com.google.android.gms.tasks.Task;
@@ -60,6 +61,10 @@ public class Profile extends AppCompatActivity {
     private Toolbar toolbar;
     private BottomSheetDialog bottomSheetDialog, bsDialogEditName, bsDialog;
     private Uri imageUri;
+
+    private String imageProfile;
+    private String userName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +107,7 @@ public class Profile extends AppCompatActivity {
         binding.bioEdit.setOnClickListener(view -> showBioBottomSheet());
 
         binding.button5.setOnClickListener(view -> showDialogSignOut());
+
     }
 
     private void fetchUserProfileData() {
@@ -249,11 +255,12 @@ public class Profile extends AppCompatActivity {
                     // Check if document exists
                     if (documentSnapshot.exists()) {
                         // Retrieve user info from Firestore
-                        String userName = documentSnapshot.getString("username");
+                        userName = documentSnapshot.getString("username");      // 🔧 CHANGED
+                        imageProfile = documentSnapshot.getString("imageProfile"); // 🔧 CHANGED
+
                         String userPhone = documentSnapshot.getString("userPhone");
                         String userBio = documentSnapshot.getString("bio");
                         String userEmail = documentSnapshot.getString("email");
-                        String imageProfile = documentSnapshot.getString("imageProfile");
 
                         Log.d("ProfileActivity", "User phone: " + userPhone);  // Debugging to check phone number
 
@@ -279,6 +286,19 @@ public class Profile extends AppCompatActivity {
                     // Handle failure when fetching data
                     showError("Failed to load user info");
                 });
+
+        binding.Change.setOnClickListener(v -> {
+            // 🔧 CHANGED: Use class-level variables, not local
+            if (imageProfile != null && userName != null) { // 🔧 CHANGED
+                Intent intent = new Intent(Profile.this, showImage.class);
+                intent.putExtra("IMAGE", imageProfile); // 🔧 CHANGED
+                intent.putExtra("name", userName);      // 🔧 CHANGED
+                startActivity(intent);
+            } else {
+                Toast.makeText(Profile.this, "User data not available", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     // Helper method to show error message
@@ -295,6 +315,7 @@ public class Profile extends AppCompatActivity {
                         // Show success message
                         Toast.makeText(Profile.this, "Username updated successfully", Toast.LENGTH_SHORT).show();
                         binding.nameProfile.setText(name);
+                        userName = name;
                     } else {
                         // Show error message
                         showError("Failed to update username");

@@ -233,7 +233,11 @@ public class ChatActivity extends AppCompatActivity {
         binding.imageProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(ChatActivity.this, UserProfileActivity.class).putExtra("userID", receiverID).putExtra("userProfile", userProfile).putExtra("username", userName).putExtra("userPhone", userPhone).putExtra("bio", UserBio));
+                startActivity(new Intent(ChatActivity.this,
+                        UserProfileActivity.class).putExtra("userID",
+                                receiverID).putExtra("userProfile", userProfile).
+                        putExtra("username", userName).putExtra("userPhone", userPhone)
+                        .putExtra("bio", UserBio));
             }
         });
 

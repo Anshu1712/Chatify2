@@ -5,14 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.chatify.R;
 import com.example.chatify.adapters.showImage;
+import com.example.chatify.chat.ChatActivity;
 import com.example.chatify.model.ChatListModel;
 
 import java.util.Objects;
@@ -36,8 +39,8 @@ public class userDisplay {
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setAttributes(lp);
 
         ImageView btnChat = dialog.findViewById(R.id.btnChat);
@@ -60,6 +63,48 @@ public class userDisplay {
             intent.putExtra("name", chatListModel.getUserName());
             context.startActivity(intent);
             dialog.dismiss();
+        });
+
+        btnChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, ChatActivity.class)
+                        .putExtra("userID", chatListModel.getUserID())
+                        .putExtra("username", chatListModel.getUserName())
+                        .putExtra("imageProfile", chatListModel.getUrlProfile())
+                        .putExtra("userPhone", chatListModel.getUserPhone())
+                        .putExtra("bio", chatListModel.getUserBio()));
+                dialog.dismiss();
+            }
+        });
+
+        btnVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "video", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+
+        btnVoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "voice", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+
+        btnOther.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, UserProfileActivity.class)
+                        .putExtra("userID", chatListModel.getUserID())
+                        .putExtra("userProfile", chatListModel.getUrlProfile())
+                        .putExtra("username", chatListModel.getUserName())
+                        .putExtra("userPhone", chatListModel.getUserPhone())
+                        .putExtra("bio", chatListModel.getUserBio()));
+                dialog.dismiss();
+            }
         });
     }
 }

@@ -13,15 +13,16 @@
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:background="@drawable/chat_bubble"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="5dp">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="3dp"
+            android:orientation="horizontal"
             android:padding="1dp">
 
 
@@ -41,28 +42,42 @@
                 android:tint="#000000"
                 tools:ignore="UseAppTint" />
 
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottie_voice_visualizer"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:visibility="invisible"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/wave" />
+
+            <Chronometer
+                android:id="@+id/txt_voice_durationLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:text="00:00"
+                android:textColor="#000000"
+                android:textSize="14sp" />
             <!-- Timer -->
-        </RelativeLayout>
+        </LinearLayout>
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/lottie_voice_visualizer"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:visibility="invisible"
-            app:lottie_autoPlay="false"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/wave" />
-
-        <Chronometer
-            android:id="@+id/txt_voice_durationLeft"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="5dp"
-            android:text="00:00"
-            android:textColor="#000000"
-            android:textSize="14sp" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/chat_timeRecive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:text="12:34 PM"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="10sp" />
+        </LinearLayout>
 
     </LinearLayout>
 

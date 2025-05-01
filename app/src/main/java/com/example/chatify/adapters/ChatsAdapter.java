@@ -1,6 +1,7 @@
 package com.example.chatify.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
@@ -86,8 +87,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         // ✅ Handle Text Message
         if (holder instanceof ViewHolderTextLeft && chat.getType().equals("TEXT")) {
             ((ViewHolderTextLeft) holder).textMessage.setText(chat.getTextMessage());
+            ((ViewHolderTextLeft) holder).textMessage2.setText(chat.getDataTime());
         } else if (holder instanceof ViewHolderTextRight && chat.getType().equals("TEXT")) {
             ((ViewHolderTextRight) holder).textMessage.setText(chat.getTextMessage());
+            ((ViewHolderTextRight) holder).textMessage2.setText(chat.getDataTime());
         }
 
         // ✅ Handle Image Message
@@ -97,18 +100,44 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .placeholder(R.drawable.person)
                     .error(R.drawable.person)
                     .into(((ViewHolderImageLeft) holder).imageMessage);
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    context.startActivity(new Intent(context, showImage.class)
+                            .putExtra("IMAGE", chat.getUrl())
+                            .putExtra("name", chat.getReceiver())
+                            .putExtra("time", chat.getDataTime()));
+                }
+            });
         } else if (holder instanceof ViewHolderImageRight && chat.getType().equals("IMAGE")) {
             Glide.with(context)
                     .load(chat.getUrl())
                     .placeholder(R.drawable.person)
                     .error(R.drawable.person)
                     .into(((ViewHolderImageRight) holder).imageMessage);
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    context.startActivity(new Intent(context, showImage.class)
+                            .putExtra("IMAGE", chat.getUrl())
+                            .putExtra("name", chat.getSender())
+                            .putExtra("time", chat.getDataTime()));
+                }
+            });
         }
 
         // ✅ Handle Voice Message
         else if ((holder instanceof ViewHolderVoiceLeft || holder instanceof ViewHolderVoiceRight)
                 && chat.getType().equals("VOICE")) {
             setupVoicePlayer(holder, chat.getUrl());
+            // ✅ Show send time
+            if (holder instanceof ViewHolderVoiceLeft) {
+                ((ViewHolderVoiceLeft) holder).textMessage.setText(chat.getDataTime());
+            } else if (holder instanceof ViewHolderVoiceRight) {
+                ((ViewHolderVoiceRight) holder).textMessage.setText(chat.getDataTime());
+            }
         }
     }
 
@@ -211,20 +240,24 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     // ✅ ViewHolder for Text (Left - Receiver)
     public static class ViewHolderTextLeft extends RecyclerView.ViewHolder {
         TextView textMessage;
+        TextView textMessage2;
 
         public ViewHolderTextLeft(@NonNull View itemView) {
             super(itemView);
             textMessage = itemView.findViewById(R.id.txtLift);
+            textMessage2 = itemView.findViewById(R.id.chat_timeRecive);
         }
     }
 
     // ✅ ViewHolder for Text (Right - Sender)
     public static class ViewHolderTextRight extends RecyclerView.ViewHolder {
         TextView textMessage;
+        TextView textMessage2;
 
         public ViewHolderTextRight(@NonNull View itemView) {
             super(itemView);
             textMessage = itemView.findViewById(R.id.txtRight);
+            textMessage2 = itemView.findViewById(R.id.chat_timeSent);
         }
     }
 
@@ -251,6 +284,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     // ✅ ViewHolder for Voice (Left - Receiver)
     public static class ViewHolderVoiceLeft extends RecyclerView.ViewHolder {
         ImageButton playButton;
+        TextView textMessage;
         Chronometer timer;
         LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
 
@@ -259,12 +293,14 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             playButton = itemView.findViewById(R.id.btn_play_voiceLeft);
             timer = itemView.findViewById(R.id.txt_voice_durationLeft);
             lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
+            textMessage = itemView.findViewById(R.id.chat_timeRecive);
         }
     }
 
     // ✅ ViewHolder for Voice (Right - Sender)
     public static class ViewHolderVoiceRight extends RecyclerView.ViewHolder {
         ImageButton playButton;
+        TextView textMessage;
         Chronometer timer;
         LottieAnimationView lottieVisualizer;  // <-- Lottie view reference
 
@@ -273,6 +309,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             playButton = itemView.findViewById(R.id.btn_play_voice);
             timer = itemView.findViewById(R.id.txt_voice_duration);
             lottieVisualizer = itemView.findViewById(R.id.lottie_voice_visualizer);
+            textMessage = itemView.findViewById(R.id.chat_timeSent);
         }
     }
 }

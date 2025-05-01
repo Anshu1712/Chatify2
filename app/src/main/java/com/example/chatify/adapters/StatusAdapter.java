@@ -1,6 +1,7 @@
 package com.example.chatify.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatify.R;
+import com.example.chatify.Status.ShowStatus;
 import com.example.chatify.model.StatusModel;
 import com.squareup.picasso.Picasso;
 
@@ -39,6 +41,19 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
         holder.instance.setText(statusModel.getTime());
         Picasso.get().load(statusModel.getImage()).into(holder.circleImageView);
         holder.name.setText(statusModel.getName());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, ShowStatus.class)
+                        .putExtra("name", statusModel.getName())
+                        .putExtra("time", statusModel.getTime())
+                        .putExtra("delete", statusModel.getDelete())
+                        .putExtra("uid", statusModel.getUid())
+                        .putExtra("caption", statusModel.getCaption())
+                        .putExtra("image", statusModel.getImage()));
+            }
+        });
     }
 
     @Override

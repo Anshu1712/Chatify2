@@ -100,6 +100,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .placeholder(R.drawable.person)
                     .error(R.drawable.person)
                     .into(((ViewHolderImageLeft) holder).imageMessage);
+            ((ViewHolderImageLeft) holder).textMessage2.setText(chat.getDataTime());
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -116,6 +117,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .placeholder(R.drawable.person)
                     .error(R.drawable.person)
                     .into(((ViewHolderImageRight) holder).imageMessage);
+            ((ViewHolderImageRight) holder).textMessage2.setText(chat.getDataTime());
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -264,20 +266,24 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     // ✅ ViewHolder for Image (Left - Receiver)
     public static class ViewHolderImageLeft extends RecyclerView.ViewHolder {
         ImageView imageMessage;
+        TextView textMessage2;
 
         public ViewHolderImageLeft(@NonNull View itemView) {
             super(itemView);
             imageMessage = itemView.findViewById(R.id.image_chatLeft);
+            textMessage2 = itemView.findViewById(R.id.chat_timeSent);
         }
     }
 
     // ✅ ViewHolder for Image (Right - Sender)
     public static class ViewHolderImageRight extends RecyclerView.ViewHolder {
         ImageView imageMessage;
+        TextView textMessage2;
 
         public ViewHolderImageRight(@NonNull View itemView) {
             super(itemView);
             imageMessage = itemView.findViewById(R.id.image_chat);
+            textMessage2 = itemView.findViewById(R.id.chat_timeSent);
         }
     }
 

@@ -64,7 +64,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     private DatabaseReference statusRef, chatList;
     private FirebaseFirestore firestore;
     private FirebaseUser firebaseUser;
-
+    private StatusModel myStatusModel; // ✅ Store current user's status
     private StatusAdapter statusAdapter;
 
     public Fragment_Status() {
@@ -130,6 +130,21 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
 //
 //            }
 //        });
+
+        binding.imageProfile.setOnClickListener(v -> {
+            if (myStatusModel != null && myStatusModel.getUid() != null) {
+                Intent intent = new Intent(getContext(), ShowStatus.class);
+                intent.putExtra("name", myStatusModel.getName());
+                intent.putExtra("time", myStatusModel.getTime());
+                intent.putExtra("delete", myStatusModel.getDelete());
+                intent.putExtra("uid", myStatusModel.getUid());
+                intent.putExtra("caption", myStatusModel.getCaption());
+                intent.putExtra("image", myStatusModel.getImage());
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(), "Status not loaded yet", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         DatabaseReference allStatusRef = FirebaseDatabase.getInstance().getReference().child("Status");
         allStatusRef.addValueEventListener(new ValueEventListener() {
@@ -204,15 +219,22 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    url = snapshot.child("image").getValue().toString();
-                    time = snapshot.child("time").getValue().toString();
-                    delete = snapshot.child("delete").getValue().toString();
+                    String image = snapshot.child("image").getValue(String.class);
+                    String time = snapshot.child("time").getValue(String.class);
+                    String delete = snapshot.child("delete").getValue(String.class);
+                    String caption = snapshot.child("caption").getValue(String.class);
 
-                    Picasso.get().load(url).into(binding.imageProfile);
+                    myStatusModel = new StatusModel();
+                    myStatusModel.setUid(uid);
+                    myStatusModel.setImage(image);
+                    myStatusModel.setTime(time);
+                    myStatusModel.setDelete(delete);
+                    myStatusModel.setCaption(caption);
+
+                    Picasso.get().load(image).into(binding.imageProfile);
                     tapToAddTv.setText(time != null ? time : "No time");
                     binding.imageProfile.setPadding(0, 0, 0, 0);
                 }
-                Log.d("data fetched success", "onDataChange: ");
             }
 
             @Override
@@ -221,6 +243,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
             }
         });
     }
+
 
     private void getProfile(String userId) {
         firestore.collection("Users").document(userId)

@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.chatify.R;
 import com.example.chatify.chat.ChatActivity;
 import com.example.chatify.model.ChatListModel;
+import com.example.chatify.profile.userDisplay;
 
 import java.util.List;
 
@@ -40,7 +41,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.Holder
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         ChatListModel chatList = list.get(position);
-
         holder.tvName.setText(chatList.getUserName());
         holder.tvDate.setText(chatList.getDate());
         holder.tvMessage.setText(chatList.getDescription());
@@ -53,6 +53,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.Holder
                     .putExtra("imageProfile", chatList.getUrlProfile())
                     .putExtra("userPhone", chatList.getUserPhone())
                     .putExtra("bio", chatList.getUserBio()));
+        });
+        holder.profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new userDisplay(context, chatList);
+
+            }
         });
     }
 

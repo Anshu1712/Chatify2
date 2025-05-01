@@ -37,6 +37,9 @@
         android:theme="@style/Theme.Chatify"
         tools:targetApi="31">
         <activity
+            android:name=".profile.userDisplay"
+            android:exported="false" />
+        <activity
             android:name=".adapters.showImage"
             android:exported="false" />
         <activity

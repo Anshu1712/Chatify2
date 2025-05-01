@@ -267,64 +267,64 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.tv_message || v.getId() == R.id.tv_name) {
-            openCameraBs();
+//            openCameraBs();
         }
     }
-
-    private void openCameraBs() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.camera_bs, null);
-        bottomSheetDialog.setContentView(view);
-
-        ImageView camera = view.findViewById(R.id.camera1);
-        LinearLayout galleryLayout = view.findViewById(R.id.gallery1);
-
-        camera.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            openCamera();
-        });
-
-        galleryLayout.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            openGallery();
-        });
-
-        bottomSheetDialog.show();
-    }
-
-    private void openCamera() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (cameraIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
-        } else {
-            Toast.makeText(getContext(), "No camera app found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        startActivityForResult(intent, REQUEST_GALLERY);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_GALLERY && data != null && data.getData() != null) {
-                imageUri = data.getData();
-                openImageActivity(imageUri);
-            } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                if (bitmap != null) {
-                    Intent intent = new Intent(getActivity(), imageActivity.class);
-                    intent.putExtra("bitmap", bitmap); // Make sure imageActivity can handle Bitmap
-                    startActivity(intent);
-                }
-            }
-        }
-    }
+//
+//    private void openCameraBs() {
+//        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+//        View view = LayoutInflater.from(getContext()).inflate(R.layout.camera_bs, null);
+//        bottomSheetDialog.setContentView(view);
+//
+//        ImageView camera = view.findViewById(R.id.camera1);
+//        LinearLayout galleryLayout = view.findViewById(R.id.gallery1);
+//
+//        camera.setOnClickListener(v -> {
+//            bottomSheetDialog.dismiss();
+//            openCamera();
+//        });
+//
+//        galleryLayout.setOnClickListener(v -> {
+//            bottomSheetDialog.dismiss();
+//            openGallery();
+//        });
+//
+//        bottomSheetDialog.show();
+//    }
+//
+//    private void openCamera() {
+//        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (cameraIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+//            startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+//        } else {
+//            Toast.makeText(getContext(), "No camera app found", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+//
+//    private void openGallery() {
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        intent.setType("image/*");
+//        startActivityForResult(intent, REQUEST_GALLERY);
+//    }
+//
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (resultCode == RESULT_OK) {
+//            if (requestCode == REQUEST_GALLERY && data != null && data.getData() != null) {
+//                imageUri = data.getData();
+//                openImageActivity(imageUri);
+//            } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
+//                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+//                if (bitmap != null) {
+//                    Intent intent = new Intent(getActivity(), imageActivity.class);
+//                    intent.putExtra("bitmap", bitmap); // Make sure imageActivity can handle Bitmap
+//                    startActivity(intent);
+//                }
+//            }
+//        }
+//    }
 
     public void onStart() {
         super.onStart();
@@ -361,11 +361,11 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
 
     }
 
-    private void openImageActivity(Uri uri) {
-        Intent intent = new Intent(getActivity(), imageActivity.class);
-        intent.putExtra("u", uri.toString());
-        startActivity(intent);
-    }
+//    private void openImageActivity(Uri uri) {
+//        Intent intent = new Intent(getActivity(), imageActivity.class);
+//        intent.putExtra("u", uri.toString());
+//        startActivity(intent);
+//    }
 
     @Override
     public void onDestroyView() {

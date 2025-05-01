@@ -1,23 +1,32 @@
 package com.example.chatify;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.chatify.Status.imageActivity;
 import com.example.chatify.adapters.MyAdapter;
 import com.example.chatify.contacts.AddContact;
 import com.example.chatify.databinding.ActivityMainBinding;
 import com.example.chatify.fragment.Fragment_Status;
 import com.example.chatify.fragment.chat;
 import com.example.chatify.setting.SettingsActivity;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -35,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private MyAdapter adapter;
     private TabLayout tabLayout;
+
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
+    public static final int REQUEST_GALLERY = 2;
+    private Uri imageUri; // Added
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,10 +167,70 @@ public class MainActivity extends AppCompatActivity {
             if (index == 0) {
                 startActivity(new Intent(MainActivity.this, AddContact.class));
             } else if (index == 1) {
-                Toast.makeText(getApplicationContext(), "Camera clicked", Toast.LENGTH_SHORT).show();
-                // TODO: startActivity(new Intent(MainActivity.this, CreateStatusActivity.class));
+                openCameraBs();
             }
         });
+    }
+
+    private void openCameraBs() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+        View view = LayoutInflater.from(this).inflate(R.layout.camera_bs, null);
+        bottomSheetDialog.setContentView(view);
+
+        ImageView camera = view.findViewById(R.id.camera1);
+        LinearLayout galleryLayout = view.findViewById(R.id.gallery1);
+
+        camera.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            openCamera();
+        });
+
+        galleryLayout.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            openGallery();
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void openCamera() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+        } else {
+            Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_GALLERY);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_GALLERY && data != null && data.getData() != null) {
+                imageUri = data.getData();
+                openImageActivity(imageUri);
+            } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                if (bitmap != null) {
+                    Intent intent = new Intent(MainActivity.this, imageActivity.class);
+                    intent.putExtra("bitmap", bitmap); // Make sure imageActivity can handle Bitmap
+                    startActivity(intent);
+                }
+            }
+        }
+    }
+
+    private void openImageActivity(Uri uri) {
+        Intent intent = new Intent(MainActivity.this, imageActivity.class);
+        intent.putExtra("u", uri.toString());
+        startActivity(intent);
     }
 
     private void playFabPopupAnimation() {

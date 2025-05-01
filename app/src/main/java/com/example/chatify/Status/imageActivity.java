@@ -154,7 +154,7 @@ public class imageActivity extends AppCompatActivity {
                                     lastStatus.child(uid).setValue(model);
 
                                     pb.setVisibility(View.GONE);
-                                    Toast.makeText(imageActivity.this, "Status Uploaded you know", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(imageActivity.this, "Status Uploaded", Toast.LENGTH_SHORT).show();
 
 
                                     // Go back to MainActivity and switch to Status tab

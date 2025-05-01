@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="7dp"
             android:padding="7dp"
-            android:text="@string/profile_photo"
+            android:text="@string/upload_photo"
             android:textColor="@color/white"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"

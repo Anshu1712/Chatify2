@@ -350,7 +350,7 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
                 storiesProgressView.setStoriesCount(image.size());
                 storiesProgressView.setStoriesListener(ShowStatus.this);
                 storiesProgressView.startStories(counter);
-                storiesProgressView.setStoryDuration(30000L);
+                storiesProgressView.setStoryDuration(10000L);
 
 
                 s_iv.setVisibility(View.VISIBLE);

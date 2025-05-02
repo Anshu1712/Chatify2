@@ -109,7 +109,7 @@ public class StatusVH extends RecyclerView.ViewHolder {
                         }
                     });
                 } else {
-
+                    ll_ss.setVisibility(View.GONE);
                 }
             }
 

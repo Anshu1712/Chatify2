@@ -8,8 +8,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,9 +26,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatify.R;
+import com.example.chatify.adapters.ViewVH;
 import com.example.chatify.model.StatusModel;
+import com.example.chatify.model.ViewListModel;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -45,7 +53,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import jp.shts.android.storiesprogressview.StoriesProgressView;
@@ -63,15 +73,16 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
     DocumentReference documentReference;
     StatusModel model;
     StoriesProgressView storiesProgressView;
-    String userId, currentUid;
+    String userId, currentUid, name, url, phone, about;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference statusRef, lastStatus;
+    DatabaseReference statusRef, lastStatus, seenUserList, viewCountRef;
     int counter = 0;
     ImageView s_iv, userIv;
     TextView tvName, StoryViewTv, captionTv, timeTv, replyTv;
     private float x1, x2, y1, y2;
     private static int MIN_DISTANCE = 50;
     private GestureDetector gestureDetector;
+    ViewListModel viewListModel;
 
     private View.OnTouchListener onTouchListener = new View.OnTouchListener() {
         @Override
@@ -102,6 +113,10 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
         this.gestureDetector = new GestureDetector(ShowStatus.this, this);
 
         model = new StatusModel();
+
+        viewListModel = new ViewListModel();
+
+
         View reverse = findViewById(R.id.viewnext);
         reverse.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,6 +177,10 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
 
         statusRef = database.getReference("Status").child(userId);
 
+        seenUserList = database.getReference("seenList").child(userId);
+
+        viewCountRef = database.getReference("seenList").child(currentUid);
+
         StoryViewTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -172,10 +191,55 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
         if (userId.equals(currentUid)) {
             StoryViewTv.setVisibility(View.VISIBLE);
             replyTv.setVisibility(View.GONE);
+            getViewCount();
         } else {
             replyTv.setVisibility(View.VISIBLE);
             StoryViewTv.setVisibility(View.GONE);
+            storeSeenUserData();
         }
+    }
+
+    private void storeSeenUserData() {
+        Calendar callForDate = Calendar.getInstance();
+        SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM");
+        final String saveDate = currentDate.format(callForDate.getTime());
+
+        Calendar callForTime = Calendar.getInstance();
+        SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:a");
+        final String saveTime = currentTime.format(callForTime.getTime());
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                viewListModel.setName(name);
+                viewListModel.setTime(saveDate + " : " + saveTime);
+                viewListModel.setUid(currentUid);
+                viewListModel.setUrl(url);
+                seenUserList.child(currentUid).setValue(viewListModel);
+            }
+        }, 2000);
+    }
+
+    private void getViewCount() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                viewCountRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int viewCount = (int) snapshot.getChildrenCount();
+                        StoryViewTv.setText(String.valueOf(viewCount));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        }, 2000);
     }
 
     private void viewBs() {
@@ -183,11 +247,50 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.view_bs);
 
-        TextView viewCountTv;
-        TextView noViewsYet;
+        TextView viewCountTv = dialog.findViewById(R.id.viewedbyTv);
+        TextView noViewsYet = dialog.findViewById(R.id.noviewyet_tv);
         ImageButton moreBtn = dialog.findViewById(R.id.more_btn_view);
+        RecyclerView recyclerView = dialog.findViewById(R.id.rv_viewBs);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(ShowStatus.this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
 
         storiesProgressView.pause();
+
+        viewCountTv.setText("Viewed by " + StoryViewTv.getText().toString());
+
+        if (StoryViewTv.getText().toString().equals("0")) {
+            // Optionally show "No views" message
+            recyclerView.setVisibility(View.GONE);
+            noViewsYet.setVisibility(View.VISIBLE);
+        } else {
+            noViewsYet.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+
+            FirebaseRecyclerOptions<ViewListModel> options =
+                    new FirebaseRecyclerOptions.Builder<ViewListModel>()
+                            .setQuery(viewCountRef, ViewListModel.class)
+                            .build();
+
+            FirebaseRecyclerAdapter<ViewListModel, ViewVH> firebaseRecyclerAdapter =
+                    new FirebaseRecyclerAdapter<ViewListModel, ViewVH>(options) {
+                        @Override
+                        protected void onBindViewHolder(@NonNull ViewVH holder, int position, @NonNull ViewListModel model) {
+                            holder.setUser(getApplication(), model.getName(), model.getUrl(), model.getTime(), model.getUid());
+                        }
+
+                        @NonNull
+                        @Override
+                        public ViewVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewbs_item, parent, false);
+                            return new ViewVH(view);
+                        }
+                    };
+
+            recyclerView.setAdapter(firebaseRecyclerAdapter);
+            firebaseRecyclerAdapter.startListening();
+        }
 
         moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -275,10 +378,10 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.getResult().exists()) {
-                    String name = task.getResult().getString("username");
-                    String about = task.getResult().getString("about");
-                    String phone = task.getResult().getString("phone");
-                    String url = task.getResult().getString("imageProfile");
+                    name = task.getResult().getString("username");
+                    about = task.getResult().getString("about");
+                    phone = task.getResult().getString("phone");
+                    url = task.getResult().getString("imageProfile");
 
                     if (url.equals("")) {
                         tvName.setText(name);

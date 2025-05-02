@@ -1,22 +1,16 @@
 package com.example.chatify.fragment;
 
-import static android.app.Activity.RESULT_OK;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bumptech.glide.Glide;
 import com.example.chatify.R;
 import com.example.chatify.Status.ShowStatus;
-import com.example.chatify.Status.imageActivity;
 import com.example.chatify.adapters.StatusAdapter;
 import com.example.chatify.adapters.StatusVH;
 import com.example.chatify.databinding.FragmentStatusBinding;
@@ -39,7 +32,6 @@ import com.example.chatify.model.StatusModel;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -288,6 +280,18 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                     tapToAddTv.setText(time != null ? time : "No time");
                     binding.imageProfile.setPadding(0, 0, 0, 0);
                 }
+
+//                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+//                    url = snapshot1.child("image").getValue().toString();
+//                    time = snapshot1.child("time").getValue().toString();
+//                    delete = Long.valueOf(snapshot1.child("delete").getValue().toString());
+//
+//                    Picasso.get().load(url).into(binding.imageProfile);
+//                    tapToAddTv.setText(time);
+//                    binding.imageProfile.setPadding(0, 0, 0, 0);
+//
+//
+//                }
             }
 
             @Override

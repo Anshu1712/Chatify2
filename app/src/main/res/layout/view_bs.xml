@@ -45,4 +45,11 @@
         android:gravity="center"
         android:text="@string/no_view_yet"
         android:textColor="@color/white" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_viewBs"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_margin="4dp"
+        android:visibility="gone" />
 </LinearLayout>

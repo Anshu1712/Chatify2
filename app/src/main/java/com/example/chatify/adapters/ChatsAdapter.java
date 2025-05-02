@@ -271,7 +271,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public ViewHolderImageLeft(@NonNull View itemView) {
             super(itemView);
             imageMessage = itemView.findViewById(R.id.image_chatLeft);
-            textMessage2 = itemView.findViewById(R.id.chat_timeSent);
+            textMessage2 = itemView.findViewById(R.id.chat_timeRecive);
         }
     }
 

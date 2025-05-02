@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -41,10 +42,15 @@ import com.example.chatify.managers.ChatService;
 import com.example.chatify.model.chat.Chats;
 import com.example.chatify.profile.UserProfileActivity;
 import com.example.chatify.service.FirebaseService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +76,12 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_chat);
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
 
         initialize();
         initBtnClick();
@@ -128,6 +140,14 @@ public class ChatActivity extends AppCompatActivity {
         binding.recordButton.setRecordView(binding.recordView);
         binding.recordView.setSlideToCancelTextColor(Color.parseColor("#ff0000"));
         binding.recordView.setRecordButtonGrowingAnimationEnabled(true);
+
+        initializeZego();
+
+        binding.video.setOnClickListener((v) -> {
+            binding.video.setIsVideoCall(true);
+            binding.video.setResourceID("zego_chat_9");  // don't touch it !!!!!!!!
+            binding.video.setInvitees(Collections.singletonList(new ZegoUIKitUser(receiverID)));
+        });
     }
 
     private void setUpRecordButton() {
@@ -371,5 +391,16 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    void initializeZego() {
+        long appID = 1504216421;   // yourAppID
+        String appSign = "394fa9d76da7090689c6253c135014074cd32ccd5c3ea9a82fe4df9268e3aa9b";
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String username = userID;
+
+        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
+
+        ZegoUIKitPrebuiltCallService.init(getApplication(), appID, appSign, userID, username, callInvitationConfig);
     }
 }

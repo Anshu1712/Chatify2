@@ -88,4 +88,10 @@
     <string name="username">username</string>
     <string name="name2">Name</string>
     <string name="upload_photo">Upload Status</string>
+    <string name="viewed_by_0">Viewed by 0</string>
+    <string name="no_view_yet">No view yet</string>
+    <string name="_0">0</string>
+    <string name="status_caption_here">Status caption here</string>
+    <string name="status_image">Status Image</string>
+    <string name="_10_mins_ago">10 mins ago</string>
 </resources>

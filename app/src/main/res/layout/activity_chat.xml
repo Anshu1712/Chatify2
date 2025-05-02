@@ -111,26 +111,25 @@
                 android:orientation="horizontal"
                 android:padding="5dp">
 
-                <!--                <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton-->
-                <!--                    android:id="@+id/video"-->
-                <!--                    android:layout_width="35dp"-->
-                <!--                    android:layout_height="35dp"-->
-                <!--                    android:layout_gravity="center_vertical"-->
-                <!--                    android:layout_marginStart="10dp"-->
-                <!--                    android:layout_marginEnd="10dp"-->
-                <!--                    android:padding="5dp"-->
+                <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
+                    android:id="@+id/video"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:padding="5dp"
+                    android:src="@drawable/baseline_videocam_24" /> <!-- Add margin to the start -->
 
-                <!--                    android:src="@drawable/videoo" /> &lt;!&ndash; Add margin to the start &ndash;&gt;-->
 
-
-                <!--                <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton-->
-                <!--                    android:id="@+id/audio"-->
-                <!--                    android:layout_width="35dp"-->
-                <!--                    android:layout_height="35dp"-->
-                <!--                    android:layout_gravity="center_vertical"-->
-                <!--                    android:layout_marginEnd="10dp"-->
-                <!--                    android:padding="5dp"-->
-                <!--                    android:src="@drawable/calll" />-->
+                <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton
+                    android:id="@+id/audio"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="10dp"
+                    android:padding="5dp"
+                    android:src="@drawable/call_icon_phone" />
 
 
                 <ImageView

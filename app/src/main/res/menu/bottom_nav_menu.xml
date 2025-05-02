@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_chats"
-        android:icon="@drawable/baseline_chat_24"
-        android:title="Chats" />
+        android:id="@+id/delete"
+        android:title="Delete" />
     <item
-        android:id="@+id/nav_status"
-        android:icon="@drawable/baseline_data_usage_24"
-        android:title="Status" />
-    <item
-        android:id="@+id/nav_calls"
-        android:icon="@drawable/baseline_call_24"
-        android:title="Calls" />
+        android:id="@+id/download"
+        android:title="Download" />
+
 </menu>

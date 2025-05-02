@@ -131,7 +131,7 @@ public class imageActivity extends AppCompatActivity {
                     SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:a");
                     final String saveTime = currentTime.format(callForTime.getTime());
 
-                    model.setDelete(String.valueOf(System.currentTimeMillis()));
+                    model.setDelete((System.currentTimeMillis() + 86400000));
                     model.setImage(downloadUri.toString());
                     model.setCaption(captionEt.getText().toString().trim());
                     model.setUid(uid);

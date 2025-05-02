@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ import com.example.chatify.model.ChatListModel;
 import com.example.chatify.model.StatusModel;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,6 +46,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
@@ -57,7 +60,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     private static final int REQUEST_IMAGE_CAPTURE = 101;
     private static final int REQUEST_GALLERY = 102;
     TextView tapToAddTv, myStatus;
-    String uid, url, time, delete;
+    String uid, url, time;
+    Long delete;
     private FragmentStatusBinding binding;
     private Uri imageUri;
     private FirebaseDatabase database;
@@ -181,6 +185,53 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
 
         checkPermission();
         fetchStatus();
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (delete != null) {
+                        deleteStatus();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(getActivity(), "Error :" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, 2000);
+    }
+
+    private void deleteStatus() {
+
+        if (System.currentTimeMillis() >= delete) {
+
+            Query query = statusRef.orderByChild("delete").equalTo(delete);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        snapshot1.getRef().removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                snapshot1.getRef().removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        } else {
+
+        }
     }
 
     private void checkPermission() {
@@ -221,7 +272,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                 if (snapshot.exists()) {
                     String image = snapshot.child("image").getValue(String.class);
                     String time = snapshot.child("time").getValue(String.class);
-                    String delete = snapshot.child("delete").getValue(String.class);
+                    Long delete = snapshot.child("delete").getValue(Long.class);
                     String caption = snapshot.child("caption").getValue(String.class);
 
                     myStatusModel = new StatusModel();
@@ -230,6 +281,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                     myStatusModel.setTime(time);
                     myStatusModel.setDelete(delete);
                     myStatusModel.setCaption(caption);
+
+                    Fragment_Status.this.delete = delete; // ✅ update class variable for later use
 
                     Picasso.get().load(image).into(binding.imageProfile);
                     tapToAddTv.setText(time != null ? time : "No time");
@@ -270,7 +323,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
 //            openCameraBs();
         }
     }
-//
+
 //    private void openCameraBs() {
 //        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
 //        View view = LayoutInflater.from(getContext()).inflate(R.layout.camera_bs, null);

@@ -32,6 +32,8 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -241,5 +243,16 @@ public class MainActivity extends AppCompatActivity {
                 .scaleY(1f)
                 .setDuration(300)
                 .start();
+    }
+
+    void initializeZego() {
+        long appID = 1504216421;   // yourAppID
+        String appSign = "394fa9d76da7090689c6253c135014074cd32ccd5c3ea9a82fe4df9268e3aa9b";
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userName = userID;
+
+        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
+
+        ZegoUIKitPrebuiltCallService.init(getApplication(), appID, appSign, userID, userName,callInvitationConfig);
     }
 }

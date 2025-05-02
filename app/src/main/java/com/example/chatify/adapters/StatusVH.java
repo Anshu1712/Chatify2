@@ -47,21 +47,57 @@ public class StatusVH extends RecyclerView.ViewHolder {
         nameTv = itemView.findViewById(R.id.tv_name_item);
         timeTv = itemView.findViewById(R.id.tv_message_item);
 
-        lastStatus.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void  onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.hasChild(uid)) {
+//        lastStatus.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void  onDataChange(@NonNull DataSnapshot snapshot) {
+//                if (snapshot.hasChild(uid)) {
+//
+//                    lastStatus.child(uid).addValueEventListener(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                            if (snapshot.exists()) {
+//                                urlResult = snapshot.child("image").getValue().toString();
+//                                timeResult = snapshot.child("time").getValue().toString();
+//                                deleteResult = snapshot.child("delete").getValue().toString();
+//
+//                                Picasso.get().load(url).into(statusIv);
+//                                timeTv.setText(timeResult != null ? timeResult : "No time");
+//                                statusIv.setPadding(0, 0, 0, 0);
+//                                nameTv.setText(name);
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(@NonNull DatabaseError error) {
+//
+//                        }
+//                    });
+//                } else {
+//                    ll_ss.setVisibility(View.GONE);
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
 
-                    lastStatus.child(uid).addValueEventListener(new ValueEventListener() {
+        statusRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (snapshot.hasChild(uid)) {
+                    statusRef.child(uid).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                urlResult = snapshot.child("image").getValue().toString();
-                                timeResult = snapshot.child("time").getValue().toString();
-                                deleteResult = snapshot.child("delete").getValue().toString();
+                            for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
+                                urlResult = dataSnapshot1.child("image").getValue().toString();
+                                timeResult = dataSnapshot1.child("time").getValue().toString();
+                                deleteResult = dataSnapshot1.child("delete").getValue().toString();
 
-                                Picasso.get().load(url).into(statusIv);
-                                timeTv.setText(timeResult != null ? timeResult : "No time");
+                                Picasso.get().load(urlResult).into(statusIv);
+                                timeTv.setText(timeResult);
                                 statusIv.setPadding(0, 0, 0, 0);
                                 nameTv.setText(name);
                             }
@@ -73,7 +109,7 @@ public class StatusVH extends RecyclerView.ViewHolder {
                         }
                     });
                 } else {
-                    ll_ss.setVisibility(View.GONE);
+
                 }
             }
 
@@ -82,6 +118,5 @@ public class StatusVH extends RecyclerView.ViewHolder {
 
             }
         });
-
     }
 }

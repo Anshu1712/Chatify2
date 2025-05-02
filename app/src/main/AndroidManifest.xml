@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-sdk
+        android:minSdkVersion="25"
+        tools:overrideLibrary="com.zegocloud.uikit.prebuilt.call" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

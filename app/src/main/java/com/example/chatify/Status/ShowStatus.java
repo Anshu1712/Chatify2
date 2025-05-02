@@ -367,7 +367,6 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
 
             }
         });
-
     }
 
     private void fetchuserinfo(String s) {

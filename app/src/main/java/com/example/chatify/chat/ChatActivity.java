@@ -23,6 +23,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -43,13 +44,20 @@ import com.example.chatify.model.chat.Chats;
 import com.example.chatify.profile.UserProfileActivity;
 import com.example.chatify.service.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService;
 import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig;
 import com.zegocloud.uikit.service.defines.ZegoUIKitUser;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -62,13 +70,20 @@ public class ChatActivity extends AppCompatActivity {
     private static final int PERMISSION_CODE = 101;
     private ActivityChatBinding binding;
     private String receiverID;
+    private String senderID;
     private String audioPath, userProfile, userName, userPhone, UserBio;
     private ChatsAdapter adapter;
     private List<Chats> list = new ArrayList<>();
     private boolean isActionShown = false;
+    DatabaseReference lastSeenRef;
+    private final android.os.Handler typingHandler = new android.os.Handler();
+    private Runnable typingTimeout = () -> lastSeenRef.child(senderID).setValue("Online");
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
     private ChatService chatService;
+    private String saveTime;
     private Uri imageUri;
     private MediaRecorder mediaRecorder;
+    Chats chats; // Declare at the top
 
 
     @Override
@@ -83,13 +98,31 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
+        lastSeenRef = database.getReference("online");
+
+        Calendar time1 = Calendar.getInstance();
+        SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:ss a");
+        saveTime = currentTime.format(time1.getTime());
+
+        // Get Chats object from Intent (make sure you passed it correctly)
+        chats = (Chats) getIntent().getSerializableExtra("online");
+
+        // Optional: Log for debugging
+        if (chats == null) {
+            Log.e("ChatActivity", "Chats object is null in onCreate()");
+        }
+
+        onlineUser();
         initialize();
         initBtnClick();
         readChats();
+        getData();
+
     }
 
     private void initialize() {
 
+        senderID = FirebaseAuth.getInstance().getUid();  // get sender ID
         Intent intent = getIntent();
         userName = intent.getStringExtra("username");
         receiverID = intent.getStringExtra("userID");
@@ -107,27 +140,33 @@ public class ChatActivity extends AppCompatActivity {
         }
 
 
-        // Change send button icon dynamically
         binding.etd.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Not needed
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (TextUtils.isEmpty(binding.etd.getText().toString())) {
+                typingHandler.removeCallbacks(typingTimeout);
+                if (TextUtils.isEmpty(s.toString().trim())) {
+                    lastSeenRef.child(senderID).setValue("Online");
                     binding.sentBtn.setVisibility(View.INVISIBLE);
                     binding.recordButton.setVisibility(View.VISIBLE);
                 } else {
+                    lastSeenRef.child(senderID).setValue("is typing...");
                     binding.sentBtn.setVisibility(View.VISIBLE);
                     binding.recordButton.setVisibility(View.INVISIBLE);
+                    typingHandler.postDelayed(typingTimeout, 2000); // Reset to online after 2s
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
+                // Optional
             }
         });
+
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
@@ -150,6 +189,59 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    private void getData() {
+        lastSeenRef.child(receiverID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String userStatus = snapshot.getValue(String.class);
+                    binding.lastSeenTv.setText(userStatus);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Error getting user status", error.toException());
+            }
+        });
+    }
+
+    private void onlineUser() {
+        if (chats != null && chats.sender != null) {
+            String senderId = chats.sender;
+
+            // Your existing logic here...
+            Log.d("ChatActivity", "Sender ID: " + senderId);
+            // Example Firebase status update logic (if any)
+        } else {
+            Log.e("ChatActivity", "Chats object or sender is null in onlineUser()");
+        }
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        lastSeenRef.child(senderID).onDisconnect()
+                .setValue("Last seen " + new SimpleDateFormat("hh:mm a").format(Calendar.getInstance().getTime()));
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        String currentTime = new SimpleDateFormat("hh:mm a").format(Calendar.getInstance().getTime());
+        lastSeenRef.child(senderID).setValue("Last seen " + currentTime);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        lastSeenRef.child(senderID).setValue("Last seen " + saveTime);
+    }
+
+
     private void setUpRecordButton() {
         binding.recordButton.setRecordView(binding.recordView);
         binding.recordView.setSlideToCancelTextColor(Color.RED);
@@ -160,6 +252,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onStart() {
                 if (checkPermissions()) {
                     hideChatControls();
+                    lastSeenRef.child(senderID).setValue("is recording...");
                     startRecording();
                     vibrate(100);
                 } else {
@@ -167,15 +260,20 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
 
+
             @Override
             public void onCancel() {
                 stopRecording(false);
+                lastSeenRef.child(senderID).setValue("Online");
+
             }
 
             @Override
             public void onFinish(long recordTime, boolean limitReached) {
                 showChatControls();
                 stopRecording(true);
+                lastSeenRef.child(senderID).setValue("Online");
+
             }
 
             @Override
@@ -186,6 +284,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onLock() {
             }
+
         });
 
         binding.recordView.setOnBasketAnimationEndListener(new OnBasketAnimationEnd() {

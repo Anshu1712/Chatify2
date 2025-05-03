@@ -21,7 +21,7 @@
             android:background="?attr/colorPrimary"
             android:paddingTop="30dp"
             android:title="WhatsApp"
-            android:titleTextColor="@color/white" />
+            android:titleTextColor="@color/black" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- ViewPager2 for Tabs -->

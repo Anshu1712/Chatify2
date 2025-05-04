@@ -7,17 +7,27 @@ public class Chats {
     public String type;
     public String sender;
     public String receiver;
+    public String mno;
 
     public Chats() {
     }
 
-    public Chats(String dataTime, String textMessage, String url, String type, String sender, String receiver) {
+    public Chats(String dataTime, String textMessage, String url, String type, String sender, String receiver, String mno) {
         this.dataTime = dataTime;
         this.textMessage = textMessage;
         this.url = url;
         this.type = type;
         this.sender = sender;
         this.receiver = receiver;
+
+    }
+
+    public String getMno() {
+        return mno;
+    }
+
+    public void setMno(String mno) {
+        this.mno = mno;
     }
 
     public String getUrl() {

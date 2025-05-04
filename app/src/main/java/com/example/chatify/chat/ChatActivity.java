@@ -75,7 +75,8 @@ public class ChatActivity extends AppCompatActivity {
     private ChatsAdapter adapter;
     private List<Chats> list = new ArrayList<>();
     private boolean isActionShown = false;
-    DatabaseReference lastSeenRef;
+    DatabaseReference lastSeenRef, seenStatus;
+    String key1, key2;
     private final android.os.Handler typingHandler = new android.os.Handler();
     private Runnable typingTimeout = () -> lastSeenRef.child(senderID).setValue("Online");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -99,6 +100,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         lastSeenRef = database.getReference("online");
+        seenStatus = database.getReference("seenStatus");
 
         Calendar time1 = Calendar.getInstance();
         SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:ss a");
@@ -338,11 +340,18 @@ public class ChatActivity extends AppCompatActivity {
 
     private void initBtnClick() {
         binding.sentBtn.setOnClickListener(v -> {
-            if (!TextUtils.isEmpty(binding.etd.getText().toString())) {
+            if (!TextUtils.isEmpty(binding.etd.getText().toString()) && receiverID != null) {
+                // Sending the text message
                 chatService.sendTextMsg(binding.etd.getText().toString());
+                incrementMessageCount(FirebaseAuth.getInstance().getCurrentUser().getUid(), receiverID);
+                // Clear the input field after sending
                 binding.etd.setText("");
+            } else {
+                Log.e(TAG, "Receiver ID is null or message text is empty");
             }
         });
+
+
         binding.backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -489,6 +498,24 @@ public class ChatActivity extends AppCompatActivity {
                     });
                 }
             }
+        });
+    }
+
+    private void incrementMessageCount(String senderId, String receiverId) {
+        DatabaseReference countRef = FirebaseDatabase.getInstance()
+                .getReference("MessageCount")
+                .child(senderId)
+                .child(receiverId)
+                .child("count");
+
+        countRef.get().addOnSuccessListener(snapshot -> {
+            long currentCount = 0;
+            if (snapshot.exists()) {
+                currentCount = snapshot.getValue(Long.class);
+            }
+            countRef.setValue(currentCount + 1); // Increment the message count
+        }).addOnFailureListener(e -> {
+            Log.e("CountError", "Failed to read or update count: " + e.getMessage());
         });
     }
 

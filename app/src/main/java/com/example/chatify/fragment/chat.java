@@ -115,58 +115,86 @@ public class chat extends Fragment {
                     }
                 });
     }
-
-    // Method to fetch user info for all users in the chat list
     private void getUserInfo() {
-        binding.progressCircular.setVisibility(View.VISIBLE); // Show progress while fetching user data
-        binding.recyclerView.setVisibility(View.VISIBLE); // Show the RecyclerView once user data is fetched
-        binding.inInvite.setVisibility(View.GONE); // Hide invite section once chat data exists
+        binding.progressCircular.setVisibility(View.VISIBLE);
+        binding.recyclerView.setVisibility(View.VISIBLE);
+        binding.inInvite.setVisibility(View.GONE);
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                for (String userId : allUserID) {
-                    firestore.collection("Users").document(userId).get()
-                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                @Override
-                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    Log.d(TAG, "onSuccess: add " + documentSnapshot.getString("username"));
-                                    try {
-                                        // Create a new ChatListModel object for each user
-                                        ChatListModel chat = new ChatListModel(
-                                                documentSnapshot.getString("userID"),
-                                                documentSnapshot.getString("username"),
-                                                "This is description..",
-                                                getCurrentTime(),
-                                                documentSnapshot.getString("imageProfile"),
-                                                documentSnapshot.getString("userPhone"),
-                                                documentSnapshot.getString("bio"),
-                                                documentSnapshot.getString("unSeen"),
-                                                documentSnapshot.getString("0"),
-                                                documentSnapshot.getString("lastM")
-                                        );
-                                        list.add(chat);
-                                    } catch (Exception e) {
-                                        Log.d(TAG, "onSuccess: " + e.getMessage());
-                                    }
-                                    // Notify the adapter that new data has been added
-                                    if (adapter != null) {
-                                        adapter.notifyItemInserted(list.size() - 1);
-                                        adapter.notifyDataSetChanged();
-                                    }
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d(TAG, "onFailure: " + e.getMessage());
-                                }
-                            });
-                }
+        list.clear(); // Clear old data
+        adapter.notifyDataSetChanged();
 
-                // After data is loaded, hide progress and show chat list
-                binding.progressCircular.setVisibility(View.GONE); // Hide progress
-            }
-        });
+        for (String userId : allUserID) {
+            firestore.collection("Users").document(userId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            // Step 1: Fetch last message
+                            reference.child("Chats").orderByChild("timestamp")
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            String lastMessage = "";
+                                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                                String sender = snap.child("sender").getValue(String.class);
+                                                String receiver = snap.child("receiver").getValue(String.class);
+
+                                                if ((sender != null && receiver != null) &&
+                                                        ((sender.equals(firebaseUser.getUid()) && receiver.equals(userId)) ||
+                                                                (receiver.equals(firebaseUser.getUid()) && sender.equals(userId)))) {
+                                                    lastMessage = snap.child("message").getValue(String.class);
+                                                }
+                                            }
+
+                                            // Step 2: Create ChatListModel with dummy count (will update in real-time)
+                                            ChatListModel chat = new ChatListModel(
+                                                    userId,
+                                                    documentSnapshot.getString("username"),
+                                                    "",
+                                                    getCurrentTime(),
+                                                    documentSnapshot.getString("imageProfile"),
+                                                    documentSnapshot.getString("userPhone"),
+                                                    documentSnapshot.getString("bio"),
+                                                    documentSnapshot.getString("unSeen"),
+                                                    0, // Initial count
+                                                    lastMessage
+                                            );
+
+                                            list.add(chat);
+                                            int index = list.size() - 1;
+                                            adapter.notifyItemInserted(index);
+
+                                            // Step 3: Attach real-time listener to message count
+                                            reference.child("MessageCount")
+                                                    .child(userId)
+                                                    .child(firebaseUser.getUid())
+                                                    .child("count")
+                                                    .addValueEventListener(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            int count = dataSnapshot.exists() ? dataSnapshot.getValue(Integer.class) : 0;
+
+                                                            // Update model and notify adapter
+                                                            chat.setmCount(count);
+                                                            adapter.notifyItemChanged(index);
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            Log.e(TAG, "Message count listener error: " + error.getMessage());
+                                                        }
+                                                    });
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            Log.d(TAG, "Chat fetch error: " + error.getMessage());
+                                        }
+                                    });
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.d(TAG, "User fetch failed: " + e.getMessage()));
+        }
+
+        binding.progressCircular.setVisibility(View.GONE);
     }
 
     private String getCurrentTime() {

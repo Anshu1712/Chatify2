@@ -94,4 +94,5 @@
     <string name="status_caption_here">Status caption here</string>
     <string name="status_image">Status Image</string>
     <string name="_10_mins_ago">10 mins ago</string>
+    <string name="_10">10</string>
 </resources>

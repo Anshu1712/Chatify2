@@ -9,7 +9,7 @@ public class ChatListModel {
     private String userPhone;// Stores the user's phone number.
     private String UserBio;
     private String seen;
-    private String mCount;
+    private int mCount;
     private String lastM;
 
     // Default constructor - an empty constructor required by certain frameworks like Firebase or when no parameters are passed during object creation.
@@ -17,7 +17,7 @@ public class ChatListModel {
     }
 
     // Parameterized constructor - Allows creating an instance of ChatListModel by providing values for all fields.
-    public ChatListModel(String userID, String userName, String description, String date, String urlProfile, String userPhone, String bio, String seen, String mCount, String lastM) {
+    public ChatListModel(String userID, String userName, String description, String date, String urlProfile, String userPhone, String bio, String seen, int mCount, String lastM) {
         this.userID = userID;          // Initialize the userID with the provided userID.
         this.userName = userName;      // Initialize the userName with the provided userName.
         this.description = description; // Initialize the description with the provided description.
@@ -108,11 +108,11 @@ public class ChatListModel {
         this.seen = seen;
     }
 
-    public String getmCount() {
+    public int getmCount() {
         return mCount;
     }
 
-    public void setmCount(String mCount) {
+    public void setmCount(int mCount) {
         this.mCount = mCount;
     }
 

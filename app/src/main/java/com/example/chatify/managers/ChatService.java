@@ -66,7 +66,7 @@ public class ChatService {
 
     public void sendTextMsg(String text) {
 
-        Chats chats = new Chats(getCurrentDate(), text, "", "TEXT", firebaseUser.getUid(), receiverID);
+        Chats chats = new Chats(getCurrentDate(), text, "", "TEXT", firebaseUser.getUid(), receiverID,"");
 
         reference.child("Chats").push().setValue(chats)
                 .addOnSuccessListener(unused -> Log.d("Send", "Message Sent"))
@@ -86,7 +86,7 @@ public class ChatService {
     }
 
     public void setImage(String imageUri) {
-        Chats chats = new Chats(getCurrentDate(), "", imageUri, "IMAGE", firebaseUser.getUid(), receiverID);
+        Chats chats = new Chats(getCurrentDate(), "", imageUri, "IMAGE", firebaseUser.getUid(), receiverID, "");
 
         reference.child("Chats").push().setValue(chats)
                 .addOnSuccessListener(unused -> Log.d("Send", "Message Sent"))
@@ -122,7 +122,7 @@ public class ChatService {
                 Uri downloadUrl = uriTask.getResult();
                 String voiceUrl = String.valueOf(downloadUrl);
 
-                Chats chats = new Chats(getCurrentDate(), "", voiceUrl, "VOICE", firebaseUser.getUid(), receiverID);
+                Chats chats = new Chats(getCurrentDate(), "", voiceUrl, "VOICE", firebaseUser.getUid(), receiverID,"");
 
                 reference.child("Chats").push().setValue(chats)
                         .addOnSuccessListener(unused -> Log.d("Send", "Message Sent"))

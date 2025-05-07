@@ -97,8 +97,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         else if (holder instanceof ViewHolderImageLeft && chat.getType().equals("IMAGE")) {
             Glide.with(context)
                     .load(chat.getUrl())
-                    .placeholder(R.drawable.person)
-                    .error(R.drawable.person)
+                    .placeholder(R.drawable.gallery)
+                    .error(R.drawable.gallery)
                     .into(((ViewHolderImageLeft) holder).imageMessage);
             ((ViewHolderImageLeft) holder).textMessage2.setText(chat.getDataTime());
 
@@ -114,8 +114,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         } else if (holder instanceof ViewHolderImageRight && chat.getType().equals("IMAGE")) {
             Glide.with(context)
                     .load(chat.getUrl())
-                    .placeholder(R.drawable.person)
-                    .error(R.drawable.person)
+                    .placeholder(R.drawable.gallery)
+                    .error(R.drawable.gallery)
                     .into(((ViewHolderImageRight) holder).imageMessage);
             ((ViewHolderImageRight) holder).textMessage2.setText(chat.getDataTime());
 

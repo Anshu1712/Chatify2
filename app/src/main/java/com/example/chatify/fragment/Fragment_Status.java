@@ -29,9 +29,12 @@ import com.example.chatify.adapters.StatusVH;
 import com.example.chatify.databinding.FragmentStatusBinding;
 import com.example.chatify.model.ChatListModel;
 import com.example.chatify.model.StatusModel;
+import com.example.chatify.model.Users;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
@@ -54,6 +58,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     TextView tapToAddTv, myStatus;
     String uid, url, time;
     Long delete;
+
+    public String admin_image_url;
     private FragmentStatusBinding binding;
     private Uri imageUri;
     private FirebaseDatabase database;
@@ -62,6 +68,9 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
     private FirebaseUser firebaseUser;
     private StatusModel myStatusModel; // ✅ Store current user's status
     private StatusAdapter statusAdapter;
+
+    public String admin;
+    public String admin_image;
 
     public Fragment_Status() {
     }
@@ -93,15 +102,64 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
             return;
         }
 
+        List<StatusModel> status_list = new ArrayList<>();
+
+        FirebaseFirestore.getInstance().collection("Users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful() && task.getResult().exists()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    Users model = documentSnapshot.toObject(Users.class);
+                    admin = model.getUsername();
+
+                    Log.d("imagell tag", "check009: "+admin_image);
+                    statusAdapter = new StatusAdapter(getContext(), status_list, admin,admin_image);
+                    binding.statusRecycle.setAdapter(statusAdapter);
+
+                    binding.statusRecycle.setLayoutManager(new LinearLayoutManager(getActivity()));
+                    binding.statusRecycle.setHasFixedSize(true);
+
+                    String uid_admin = FirebaseAuth.getInstance().getUid().toString();
+                    DatabaseReference allStatusRef = FirebaseDatabase.getInstance().getReference().child("Status");
+                    allStatusRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            status_list.clear(); // clear previous data
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                String userId = userSnapshot.getKey();
+                                if (userId != null && !userId.equals(uid)) { // exclude current user's status
+                                    for (DataSnapshot statusSnap : userSnapshot.getChildren()) {
+                                        StatusModel statusModel = statusSnap.getValue(StatusModel.class);
+                                        if (statusModel != null) {
+                                            String friend_uid = statusModel.getUid().toString();
+                                            if (!uid_admin.equals(friend_uid)) {
+                                                status_list.add(statusModel);
+                                                Log.d("xoxo", "list : "+statusModel.getImage());
+                                            }
+                                            break; // only show the latest status for each user (optional)
+                                        }
+                                    }
+                                }
+                            }
+                            statusAdapter.notifyDataSetChanged();
+
+                            Log.d("admin", "name: " + admin);
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("StatusError", "Failed to load other users' statuses: " + error.getMessage());
+                        }
+                    });
+                }
+            }
+        });
         tapToAddTv = binding.tvMessage;
         myStatus = binding.tvName;
         statusRef = database.getReference("Laststatus");
 
-        List<StatusModel> status_list = new ArrayList<>();
-        binding.statusRecycle.setLayoutManager(new LinearLayoutManager(getActivity()));
-        binding.statusRecycle.setHasFixedSize(true);
-        statusAdapter = new StatusAdapter(getContext(), status_list);
-        binding.statusRecycle.setAdapter(statusAdapter);
+
+
+
 
 //        FirebaseDatabase.getInstance().getReference().child("Status").child(FirebaseAuth.getInstance().getCurrentUser().getUid().toString()).addValueEventListener(new ValueEventListener() {
 //            @Override
@@ -134,6 +192,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                 intent.putExtra("time", myStatusModel.getTime());
                 intent.putExtra("delete", myStatusModel.getDelete());
                 intent.putExtra("uid", myStatusModel.getUid());
+
                 intent.putExtra("caption", myStatusModel.getCaption());
                 intent.putExtra("image", myStatusModel.getImage());
                 startActivity(intent);
@@ -142,31 +201,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
             }
         });
 
-        DatabaseReference allStatusRef = FirebaseDatabase.getInstance().getReference().child("Status");
-        allStatusRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                status_list.clear(); // clear previous data
-                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                    String userId = userSnapshot.getKey();
-                    if (userId != null && !userId.equals(uid)) { // exclude current user's status
-                        for (DataSnapshot statusSnap : userSnapshot.getChildren()) {
-                            StatusModel statusModel = statusSnap.getValue(StatusModel.class);
-                            if (statusModel != null) {
-                                status_list.add(statusModel);
-                                break; // only show the latest status for each user (optional)
-                            }
-                        }
-                    }
-                }
-                statusAdapter.notifyDataSetChanged();
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("StatusError", "Failed to load other users' statuses: " + error.getMessage());
-            }
-        });
+
 
 
         tapToAddTv.setOnClickListener(this);
@@ -276,6 +312,8 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
 
                     Fragment_Status.this.delete = delete; // ✅ update class variable for later use
 
+
+
                     Picasso.get().load(image).into(binding.imageProfile);
                     tapToAddTv.setText(time != null ? time : "No time");
                     binding.imageProfile.setPadding(0, 0, 0, 0);
@@ -309,6 +347,7 @@ public class Fragment_Status extends Fragment implements View.OnClickListener {
                     String imageProfile = documentSnapshot.getString("imageProfile");
                     if (isAdded() && getContext() != null && imageProfile != null) {
                         Glide.with(getContext()).load(imageProfile).into(binding.imageProfile);
+                        admin_image = imageProfile;
                     }
                 })
                 .addOnFailureListener(e -> showError("Failed to load user info"));

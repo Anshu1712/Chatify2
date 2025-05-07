@@ -2,6 +2,7 @@ package com.example.chatify.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +23,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder> {
 
     private Context context;
+    private String admin_name;
     private List<StatusModel> list;
 
-    public StatusAdapter(Context context, List<StatusModel> list) {
+    private String ans;
+    public StatusAdapter(Context context, List<StatusModel> list, String admin, String admin_image) {
         this.context = context;
         this.list = list;
+        this.ans = admin_image;
+        this.admin_name = admin;
     }
 
     @NonNull
@@ -38,20 +43,36 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         StatusModel statusModel = list.get(position);
+        String name = statusModel.getName();
+        String time = statusModel.getTime();
+        Long delete = statusModel.getDelete();
+        String uid =statusModel.getUid();
+        String caption = statusModel.getCaption();
+        String image = statusModel.getImage();
+
         holder.instance.setText(statusModel.getTime());
         Picasso.get().load(statusModel.getImage()).into(holder.circleImageView);
         holder.name.setText(statusModel.getName());
 
+
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                context.startActivity(new Intent(context, ShowStatus.class)
-                        .putExtra("name", statusModel.getName())
-                        .putExtra("time", statusModel.getTime())
-                        .putExtra("delete", statusModel.getDelete())
-                        .putExtra("uid", statusModel.getUid())
-                        .putExtra("caption", statusModel.getCaption())
-                        .putExtra("image", statusModel.getImage()));
+                Log.d("status tag 44", "on click holder item: "+statusModel.getName());
+                v.getContext().startActivity(new Intent(context, ShowStatus.class)
+                        .putExtra("name",name)
+                        .putExtra("admin",admin_name)
+                        .putExtra("time",time)
+                        .putExtra("delete", delete)
+                        .putExtra("uid", uid)
+                        .putExtra("caption", caption)
+                                .putExtra("uns",ans)
+                        .putExtra("image", image));
+
+                Log.d("tanjiro", "onClick: ddd "+ ans);
+
+
             }
         });
     }

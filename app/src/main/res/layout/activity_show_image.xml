@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
         android:background="#000000"
-        android:src="@drawable/user"
+        android:src="@drawable/gallery"
         android:transitionName="Name" />
 
     <androidx.appcompat.widget.Toolbar

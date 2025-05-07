@@ -44,6 +44,7 @@ import com.example.chatify.model.chat.Chats;
 import com.example.chatify.profile.UserProfileActivity;
 import com.example.chatify.service.FirebaseService;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -520,13 +521,21 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void initializeZego() {
-        long appID = 1504216421;   // yourAppID
-        String appSign = "394fa9d76da7090689c6253c135014074cd32ccd5c3ea9a82fe4df9268e3aa9b";
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String username = userID;
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            long appID = 852249356;
+            String appSign = "daa0a07354ee30c79fd1380c8f21fac1ad3b8e08470cc3236000c7b38987b838";
 
-        ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
+            String userID = firebaseUser.getUid();
+            String username = userID;
 
-        ZegoUIKitPrebuiltCallService.init(getApplication(), appID, appSign, userID, username, callInvitationConfig);
+            ZegoUIKitPrebuiltCallInvitationConfig callInvitationConfig = new ZegoUIKitPrebuiltCallInvitationConfig();
+
+            Log.e("ZegoInit", "Firebase user is not null.");
+            ZegoUIKitPrebuiltCallService.init(getApplication(), appID, appSign, userID, username, callInvitationConfig);
+        } else {
+            Log.e("ZegoInit", "Firebase user is null. Please log in first.");
+        }
     }
+
 }

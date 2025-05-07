@@ -2,7 +2,7 @@ package com.example.chatify.model;
 
 public class ViewListModel {
 
-    String name, url, time, uid;
+    String name = " ", url = " ", time = " ", uid = " ";
 
     public ViewListModel() {
 

@@ -3,12 +3,14 @@ package com.example.chatify.Status;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -30,6 +32,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatify.R;
+import com.example.chatify.adapters.ViewListAdapter;
 import com.example.chatify.adapters.ViewVH;
 import com.example.chatify.model.StatusModel;
 import com.example.chatify.model.ViewListModel;
@@ -56,9 +59,11 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 
 import jp.shts.android.storiesprogressview.StoriesProgressView;
+import timber.log.Timber;
 
 public class ShowStatus extends AppCompatActivity implements StoriesProgressView.StoriesListener, PopupMenu.OnMenuItemClickListener, GestureDetector.OnGestureListener {
 
@@ -72,10 +77,11 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     DocumentReference documentReference;
     StatusModel model;
+    String admin;
     StoriesProgressView storiesProgressView;
     String userId, currentUid, name, url, phone, about;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference statusRef, lastStatus, seenUserList, viewCountRef;
+    DatabaseReference statusRef, lastStatus, viewCountRef;
     int counter = 0;
     ImageView s_iv, userIv;
     TextView tvName, StoryViewTv, captionTv, timeTv, replyTv;
@@ -164,20 +170,36 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
             }
         });
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            userId = extras.getString("uid");
-        } else {
+        Intent intent = getIntent();
+
+        if(intent != null){
+
+            Log.d("imagel", "imag: "+intent.getStringExtra("image"));
+
+            Calendar callForDate = Calendar.getInstance();
+            SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM");
+            final String saveDate = currentDate.format(callForDate.getTime());
+
+            Calendar callForTime = Calendar.getInstance();
+            SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:a");
+            final String saveTime = currentTime.format(callForTime.getTime());
+
+
+            viewListModel.setName(intent.getStringExtra("admin"));
+            viewListModel.setTime(saveDate + " : " + saveTime);
+            viewListModel.setUid(FirebaseAuth.getInstance().getUid());
+            viewListModel.setUrl(intent.getStringExtra("uns"));
+
+           if(!intent.getStringExtra("uid").equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) FirebaseDatabase.getInstance().getReference().child("seenList").child(intent.getStringExtra("uid")).push().setValue(viewListModel);
 
         }
+        userId = intent.getStringExtra("uid");
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         currentUid = user.getUid();
 
 
         statusRef = database.getReference("Status").child(userId);
-
-        seenUserList = database.getReference("seenList").child(userId);
 
         viewCountRef = database.getReference("seenList").child(currentUid);
 
@@ -195,30 +217,8 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
         } else {
             replyTv.setVisibility(View.VISIBLE);
             StoryViewTv.setVisibility(View.GONE);
-            storeSeenUserData();
+           // storeSeenUserData();
         }
-    }
-
-    private void storeSeenUserData() {
-        Calendar callForDate = Calendar.getInstance();
-        SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM");
-        final String saveDate = currentDate.format(callForDate.getTime());
-
-        Calendar callForTime = Calendar.getInstance();
-        SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm:a");
-        final String saveTime = currentTime.format(callForTime.getTime());
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                viewListModel.setName(name);
-                viewListModel.setTime(saveDate + " : " + saveTime);
-                viewListModel.setUid(currentUid);
-                viewListModel.setUrl(url);
-                seenUserList.child(currentUid).setValue(viewListModel);
-            }
-        }, 2000);
     }
 
     private void getViewCount() {
@@ -258,39 +258,49 @@ public class ShowStatus extends AppCompatActivity implements StoriesProgressView
 
         storiesProgressView.pause();
 
-        viewCountTv.setText("Viewed by " + StoryViewTv.getText().toString());
+        HashSet<String> set = new HashSet<>();
+        List<ViewListModel> list = new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference().child("seenList").child(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                list.clear();
+                set.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Log.d("DEBUG_SNAPSHOT", dataSnapshot.toString());
 
-        if (StoryViewTv.getText().toString().equals("0")) {
-            // Optionally show "No views" message
-            recyclerView.setVisibility(View.GONE);
-            noViewsYet.setVisibility(View.VISIBLE);
-        } else {
-            noViewsYet.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+                    ViewListModel viewListModel1 = dataSnapshot.getValue(ViewListModel.class);
+                    if (viewListModel1 != null && !set.contains(viewListModel1.getUid())) {
+                        list.add(viewListModel1);
+                        set.add(viewListModel1.getUid());
+                    }
+                }
+                viewCountTv.setText("Viewed by " + list.size());
 
-            FirebaseRecyclerOptions<ViewListModel> options =
-                    new FirebaseRecyclerOptions.Builder<ViewListModel>()
-                            .setQuery(viewCountRef, ViewListModel.class)
-                            .build();
+                if (list.isEmpty()) {
+                    recyclerView.setVisibility(View.GONE);
+                    noViewsYet.setVisibility(View.VISIBLE);
+                    Log.d("status tag 44", "not working");
+                } else {
+                    noViewsYet.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
 
-            FirebaseRecyclerAdapter<ViewListModel, ViewVH> firebaseRecyclerAdapter =
-                    new FirebaseRecyclerAdapter<ViewListModel, ViewVH>(options) {
-                        @Override
-                        protected void onBindViewHolder(@NonNull ViewVH holder, int position, @NonNull ViewListModel model) {
-                            holder.setUser(getApplication(), model.getName(), model.getUrl(), model.getTime(), model.getUid());
-                        }
+                    ViewListAdapter adapter = new ViewListAdapter(ShowStatus.this, list);
+                    recyclerView.setAdapter(adapter);
 
-                        @NonNull
-                        @Override
-                        public ViewVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewbs_item, parent, false);
-                            return new ViewVH(view);
-                        }
-                    };
+                    Log.d("status tag 44", " working");
+                    adapter.notifyDataSetChanged();
 
-            recyclerView.setAdapter(firebaseRecyclerAdapter);
-            firebaseRecyclerAdapter.startListening();
-        }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        Timber.tag("status tag 44").d("viewBs: k" + list.toString());
+
 
         moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
